@@ -34,6 +34,11 @@ List<chessPiece> whiteCapturedPieces = [];
 // indicating the turns 
 bool isWhiteTurn = true;
 
+// keepoing track of the kings position
+List<int> whiteKingPosition = [7, 4];
+List<int> blackKingPosition = [0, 4];
+bool checkStatus = false; 
+
 @override
 void initState() {
   super.initState();
@@ -381,33 +386,71 @@ List<List<int>> calculateValidMoves(int row, int column, chessPiece? piece) {
 }
 
   // moving the piece to the selected square
-  void movePiece(int newRow, int newColumn){
-    // if the new spot has an enemy piece 
-    if (board[newRow][newColumn] != null) {
-      // adding the captured piece to the respective list
-      var capturedPiece = board[newRow][newColumn];
-      if (capturedPiece!.isWhite) {
-        whiteCapturedPieces.add(capturedPiece);
-      } else {
-        blackCapturedPieces.add(capturedPiece);
-      }
+void movePiece(int newRow, int newColumn){
+  // if the new spot has an enemy piece 
+  if (board[newRow][newColumn] != null) {
+    // adding the captured piece to the respective list
+    var capturedPiece = board[newRow][newColumn];
+    if (capturedPiece!.isWhite) {
+      whiteCapturedPieces.add(capturedPiece);
+    } else {
+      blackCapturedPieces.add(capturedPiece);
     }
-
-    // move the piece to the new square
-    board[newRow][newColumn] = selectedPiece;
-    // clear the old square
-    board[selectedRow][selectedColumn] = null; // clear the old square
-    // clear the selection
-    setState(() {
-      selectedPiece = null;
-      selectedRow = -1;
-      selectedColumn = -1;
-      validMoves = [];
-    });
-
-    // changing the turns 
-    isWhiteTurn = !isWhiteTurn;
   }
+
+  // move the piece to the new square
+  board[newRow][newColumn] = selectedPiece;
+  board[selectedRow][selectedColumn] = null; 
+
+  // see if any king is under attack
+  if (isKingInCheck(!isWhiteTurn)) {
+    checkStatus = true;
+  } else {
+    checkStatus = false;
+  }
+
+  // checking if the piece being moved is the king 
+  if (selectedPiece!.type == chessPieceType.king) {
+    // update the appropriate king position
+    if (selectedPiece!.isWhite) {
+      whiteKingPosition = [newRow, newColumn];
+    } else{
+      blackKingPosition = [newRow, newColumn];
+    }
+  }
+
+  // clear the selection
+  setState(() {
+    selectedPiece = null; 
+    selectedRow = -1;
+    selectedColumn = -1;
+    validMoves = [];
+  });
+
+  // changing the turns 
+  isWhiteTurn = !isWhiteTurn;
+}
+  
+bool isKingInCheck(bool isWhiteKing){
+  // getting the position of the king
+  List<int> kingPosition = 
+      isWhiteKing ? whiteKingPosition : blackKingPosition;
+  // checking if enemy can attack the king
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      // skipping empty squares and own pieces
+      if (board[i][j] == null || board[i][j]!.isWhite == isWhiteKing) {
+        continue;
+      }
+    List<List<int>> pieceValidMoves = calculateValidMoves(i, j, board[i][j]);
+    // checking if the kings position is valid
+    if (pieceValidMoves.any((move) => move[0] == kingPosition[0] && move[1] == kingPosition[1])) {
+      return true;
+    }
+    }
+  }
+  return false;
+}
 
   @override
   Widget build(BuildContext context) {
@@ -426,6 +469,14 @@ List<List<int>> calculateValidMoves(int row, int column, chessPiece? piece) {
                 imagePath: whiteCapturedPieces[index].imagePath, 
                 isWhite: true,
               ),
+            ),
+          ),
+          // game status
+          Text(
+            checkStatus? 'Check!' : '',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
             ),
           ),
 
