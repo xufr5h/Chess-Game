@@ -185,7 +185,7 @@ void _selectedPiece(int row, int column){
       selectedColumn = -1;  
     }
     // if a piece is selected then we will be calculating its valid moves
-    validMoves = calculateValidMoves(selectedRow, selectedColumn, selectedPiece);
+    validMoves = calculateRealValidMoves(selectedRow, selectedColumn, selectedPiece, true);
   });
 }
 
@@ -385,7 +385,28 @@ List<List<int>> calculateValidMoves(int row, int column, chessPiece? piece) {
 
 }
 
-  // moving the piece to the selected square
+// calculting the real valid moves
+List<List<int>>calculateRealValidMoves (int row, int column, chessPiece ? piece, bool checkSimulation){
+  List<List<int>> realValidMoves = [];
+  List<List<int>> candidateMoves = calculateValidMoves(row, column, piece);
+
+  // cheking the king checks after generating all possible moves 
+  if (checkSimulation) {
+    for (var move in candidateMoves) {
+      int endRow = move[0];
+      int endColumn = move[1];
+       if (simulatedMoveIsSafe(piece!, row, column, endRow, endColumn)) {
+        realValidMoves.add(move);
+      }
+    }
+    }else {
+      realValidMoves = candidateMoves;
+    }
+    return realValidMoves;
+  }
+
+
+// moving the piece to the selected square
 void movePiece(int newRow, int newColumn){
   // if the new spot has an enemy piece 
   if (board[newRow][newColumn] != null) {
@@ -442,7 +463,7 @@ bool isKingInCheck(bool isWhiteKing){
       if (board[i][j] == null || board[i][j]!.isWhite == isWhiteKing) {
         continue;
       }
-    List<List<int>> pieceValidMoves = calculateValidMoves(i, j, board[i][j]);
+    List<List<int>> pieceValidMoves = calculateRealValidMoves(i, j, board[i][j], false);
     // checking if the kings position is valid
     if (pieceValidMoves.any((move) => move[0] == kingPosition[0] && move[1] == kingPosition[1])) {
       return true;
@@ -450,6 +471,43 @@ bool isKingInCheck(bool isWhiteKing){
     }
   }
   return false;
+}
+
+// simulating a future move to see if its safe
+bool simulatedMoveIsSafe(chessPiece piece, int startRow, int startColumn, int endRow, int endColumn) {
+// save the current board state
+chessPiece? originalDestinationPiece = board[endRow][endColumn];
+// if the piece is the king, save its  current position and then update to the new one 
+List<int>? originalKingPosition;
+  if (piece.type==chessPieceType.king) {
+  originalKingPosition = 
+      piece.isWhite ? whiteKingPosition : blackKingPosition;
+    if (piece.isWhite) {
+      whiteKingPosition = [endRow, endColumn];
+  } else {
+    blackKingPosition = [endRow, endColumn];
+    }
+  }
+// simulate the move
+board[endRow][endColumn] = piece;
+board[startRow][startColumn] = null;
+
+//check if own king is under attack
+bool kingInCheck = isKingInCheck(piece.isWhite);
+
+// restore board to original position
+board[startRow][startColumn] = piece;
+board[endRow][endColumn] = originalDestinationPiece;
+
+// restoring its original position if king 
+  if (piece.type == chessPieceType.king) {
+    if (piece.isWhite) {
+      whiteKingPosition = originalKingPosition!;
+    } else {
+      blackKingPosition = originalKingPosition!;
+    }
+  }
+  return !kingInCheck; 
 }
 
   @override
