@@ -14,6 +14,13 @@ class _ChessBoardState extends State<ChessBoard> {
 // creating a 2D chess list representing the chess board
  late List<List<chessPiece?>> board;
 
+//  selected piece on the board
+chessPiece? selectedPiece;
+// setting the default selected piece to null
+int selectedRow = -1;
+int selectedColumn = -1;
+
+
 @override
 void initState() {
   super.initState();
@@ -122,6 +129,23 @@ board = newBoard;
 
 }
 
+// function to handle the selection of a piece
+void _selectedPiece(int row, int column){
+  setState(() {
+    // selecting a piece if there is a piece on the square
+    if (board[row][column] != null){
+      selectedPiece = board[row][column];
+      selectedRow = row;
+      selectedColumn = column;
+    } else {
+      // if there is no piece on the square, deselect the piece
+      selectedPiece = null;
+      selectedRow = -1;
+      selectedColumn = -1;  
+    }
+  });
+}
+
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
@@ -135,7 +159,14 @@ board = newBoard;
             int y = index ~/ 8; // this is for the row
       
             bool isWhite = (x + y) % 2 == 0; // Checking if the square is white or brown
-            return Square(isWhite: isWhite, piece: board[y][x],);
+            // checking if the square is selected
+            bool isSelected = (selectedRow == y && selectedColumn == x);
+            return Square(
+              isWhite: isWhite, 
+              piece: board[y][x],
+              isSelected: isSelected,
+              onTap: () => _selectedPiece(y, x),
+            );
           },
           itemCount: 8*8,
         ),
