@@ -448,6 +448,22 @@ void movePiece(int newRow, int newColumn){
     validMoves = [];
   });
 
+// checking if its a checkmate
+  if (isCheckmate(!isWhiteTurn)) {
+    showDialog(
+      context: context, 
+      builder: (context) => AlertDialog(
+        title: const Text('CHECK MATE!'),
+        actions: [
+          TextButton(
+            onPressed: resetGame, 
+            child: const Text('Play Again?')
+          ),
+        ],
+      )
+    );
+  }
+
   // changing the turns 
   isWhiteTurn = !isWhiteTurn;
 }
@@ -510,6 +526,45 @@ board[endRow][endColumn] = originalDestinationPiece;
   return !kingInCheck; 
 }
 
+// checking if its a checkmate 
+bool isCheckmate(bool isWhiteKing){
+  // if the king is not in check then its not a checkmate 
+  if (!isKingInCheck(isWhiteKing)) {
+    return false;
+  }
+  // if there is one legal move then its not a checkmate
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      // skipping empty squares and pieces of other color
+      if (board[i][j] == null || board[i][j]!.isWhite != isWhiteKing) {
+        continue;
+      }
+      List<List<int>> pieceValidMoves = 
+          calculateRealValidMoves(i, j, board[i][j], true);
+      // if there is a valid move for the piece then its not a checkmate
+      if (pieceValidMoves.isNotEmpty) {
+        return false;
+      }
+    }
+  }
+  // if both conditions are false then its a checkmate
+  return true;
+}
+
+// resetting the game
+void resetGame(){
+  Navigator.pop(context);
+  _initializeBoard();
+  checkStatus = false;
+  whiteCapturedPieces.clear();
+  blackCapturedPieces.clear();
+  whiteKingPosition = [7, 4];
+  blackKingPosition = [0, 4];
+  setState(() {
+    
+  });
+}
+
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
@@ -527,6 +582,15 @@ board[endRow][endColumn] = originalDestinationPiece;
                 imagePath: whiteCapturedPieces[index].imagePath, 
                 isWhite: true,
               ),
+            ),
+          ),
+          // game turn
+          Text(
+            isWhiteTurn ? "White's Turn" : "Black's Turn",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: isWhiteTurn ? Colors.white : Colors.black,
             ),
           ),
           // game status
