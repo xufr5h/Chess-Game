@@ -1,18 +1,19 @@
 import 'package:chess_app/chess_board.dart';
 import 'package:chess_app/components/textfield.dart';
-import 'package:chess_app/sign_up.dart';
+import 'package:chess_app/sign_in.dart';
 import 'package:flutter/material.dart';
 
-class SignIn extends StatefulWidget {
-  const SignIn({super.key});
+class SignUp extends StatefulWidget {
+  const SignUp({super.key});
 
   @override
-  State<SignIn> createState() => _SignInState();
+  State<SignUp> createState() => _SignUpState();
 }
 
-class _SignInState extends State<SignIn> {
+class _SignUpState extends State<SignUp> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
@@ -29,7 +30,6 @@ class _SignInState extends State<SignIn> {
         child: SingleChildScrollView( 
           child: Column(
             children: [
-              const SizedBox(height: 20),
               // logo
               Center(
                 child: Image.asset(
@@ -40,7 +40,7 @@ class _SignInState extends State<SignIn> {
               ),
               // Sign In Text
               const Text(
-                'Sign In',
+                'Sign Up',
                 style: TextStyle(
                   fontSize: 40,
                   color: Colors.black,
@@ -67,12 +67,20 @@ class _SignInState extends State<SignIn> {
                 obscuretext: true,
               ),
 
+              const SizedBox(height: 20),
+              // Confirm Password
+              MyTextfield(
+                controller: confirmPasswordController,
+                hintText: "Confirm Password",
+                obscuretext: true,
+              ),
+
               const SizedBox(height: 30),
 
               // Sign in button
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ChessBoard()));
+                  
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
@@ -81,7 +89,7 @@ class _SignInState extends State<SignIn> {
                     borderRadius: BorderRadius.circular(10)
                   )
                 ),
-                child: const Text("Sign In",
+                child: const Text("Sign Up",
                   style: TextStyle(fontSize: 20, color: Colors.white),
                 ),
               ),
@@ -92,17 +100,17 @@ class _SignInState extends State<SignIn> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text('Don\'t have an account? ',
+                  const Text('Already have an account? ',
                     style: TextStyle(fontSize: 18, color: Colors.black),
                   ),
                   TextButton(
                     onPressed: (){
                       Navigator.push(context, 
-                        MaterialPageRoute(builder: (context) => const SignUp())
+                        MaterialPageRoute(builder: (context) => const SignIn())
                       );
                     }, 
                     child: const Text(
-                      'Sign Up',
+                      'Sign In',
                       style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 8, 16, 100)),
                     ),
                   ),
