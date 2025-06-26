@@ -1,4 +1,5 @@
 import 'package:chess_app/chess_board.dart';
+import 'package:chess_app/sign_in.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ChessBoard(),
+      home: SignIn.new(),
     );
   }
 }
