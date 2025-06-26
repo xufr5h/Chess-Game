@@ -276,7 +276,7 @@ List<List<int>> calculateValidMoves(int row, int column, chessPiece? piece) {
         var newRow = row + move[0];
         var newColumn = column + move[1];
         if (!isInBoard(newRow, newColumn)) {
-          continue;
+          continue; 
         }
         if (board[newRow][newColumn] != null){
             if (board[newRow][newColumn]!.isWhite != piece.isWhite) {
@@ -337,7 +337,7 @@ List<List<int>> calculateValidMoves(int row, int column, chessPiece? piece) {
           var newRow = row + i * direction[0];
           var newColumn = column + i * direction[1];
           if (!isInBoard(newRow, newColumn)) {
-            break;
+            break; 
           }
           if (board[newRow][newColumn] != null) {
             if (board[newRow][newColumn]!.isWhite != piece.isWhite) {
@@ -560,6 +560,7 @@ void resetGame(){
   blackCapturedPieces.clear();
   whiteKingPosition = [7, 4];
   blackKingPosition = [0, 4];
+  isWhiteTurn = true;
   setState(() {
     
   });
