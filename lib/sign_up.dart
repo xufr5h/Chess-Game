@@ -1,4 +1,3 @@
-import 'package:chess_app/chess_board.dart';
 import 'package:chess_app/components/textfield.dart';
 import 'package:chess_app/sign_in.dart';
 import 'package:flutter/material.dart';

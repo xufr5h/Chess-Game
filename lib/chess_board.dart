@@ -20,7 +20,7 @@ class _ChessBoardState extends State<ChessBoard> {
 chessPiece? selectedPiece;
 // setting the default selected piece to null
 int selectedRow = -1;
-int selectedColumn = -1;
+int selectedColumn = -1;cleat
 
 // creating a list of valid moves for the selected piece
 List<List<int>> validMoves = [];
