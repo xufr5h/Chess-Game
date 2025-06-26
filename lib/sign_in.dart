@@ -2,23 +2,34 @@ import 'package:chess_app/chess_board.dart';
 import 'package:chess_app/components/textfield.dart';
 import 'package:chess_app/sign_up.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_options.dart'; 
+
 
 class SignIn extends StatefulWidget {
-  const SignIn({super.key});
+  final VoidCallback showResigsterPage;
+  const SignIn({super.key, required this.showResigsterPage});
 
   @override
   State<SignIn> createState() => _SignInState();
 }
 
 class _SignInState extends State<SignIn> {
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    usernameController.dispose();
-    passwordController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
+  }
+
+  Future signInMethod() async {
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
   }
 
   @override
@@ -53,8 +64,8 @@ class _SignInState extends State<SignIn> {
 
               // Username
               MyTextfield(
-                controller: usernameController,
-                hintText: "Username",
+                controller: _emailController,
+                hintText: "email",
                 obscuretext: false,
               ),
 
@@ -62,7 +73,7 @@ class _SignInState extends State<SignIn> {
 
               // Password
               MyTextfield(
-                controller: passwordController,
+                controller: _passwordController,
                 hintText: "Password",
                 obscuretext: true,
               ),
@@ -71,9 +82,7 @@ class _SignInState extends State<SignIn> {
 
               // Sign in button
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ChessBoard()));
-                },
+                onPressed: signInMethod,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
@@ -95,12 +104,8 @@ class _SignInState extends State<SignIn> {
                   const Text('Don\'t have an account? ',
                     style: TextStyle(fontSize: 18, color: Colors.black),
                   ),
-                  TextButton(
-                    onPressed: (){
-                      Navigator.push(context, 
-                        MaterialPageRoute(builder: (context) => const SignUp())
-                      );
-                    }, 
+                  GestureDetector(
+                    onTap: widget.showResigsterPage,
                     child: const Text(
                       'Sign Up',
                       style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 8, 16, 100)),

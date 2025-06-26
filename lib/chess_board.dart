@@ -2,6 +2,7 @@ import 'package:chess_app/components/dead_pieces.dart';
 import 'package:chess_app/components/pieces.dart';
 import 'package:chess_app/components/square.dart';
 import 'package:chess_app/helper/helper_method.dart';
+import 'package:chess_app/profile.dart';
 import 'package:flutter/material.dart';
 
 class ChessBoard extends StatefulWidget {
@@ -20,7 +21,7 @@ class _ChessBoardState extends State<ChessBoard> {
 chessPiece? selectedPiece;
 // setting the default selected piece to null
 int selectedRow = -1;
-int selectedColumn = -1;cleat
+int selectedColumn = -1;
 
 // creating a list of valid moves for the selected piece
 List<List<int>> validMoves = [];
@@ -572,6 +573,19 @@ void resetGame(){
       backgroundColor: const Color.fromARGB(255, 122, 121, 121),
       body: Column(
         children: [
+          // profile
+          Padding(
+            padding: const EdgeInsets.only(top: 30),
+            child: GestureDetector(
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
+              },
+              child: CircleAvatar(
+                radius: 30,
+                backgroundImage: const AssetImage('lib/images/cat.png'),
+                ),
+            ),
+            ),
           // white pieces that has been captured
           Expanded(
             child: GridView.builder(
