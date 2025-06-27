@@ -619,7 +619,7 @@ void resetGame(){
 
           // chess board
           Expanded(
-            flex: 3,
+            flex: 4,
             child: GridView.builder(
               physics: NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
