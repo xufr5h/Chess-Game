@@ -4,6 +4,12 @@ import 'package:chess_app/components/square.dart';
 import 'package:chess_app/helper/helper_method.dart';
 import 'package:chess_app/profile.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'helper/user_score.dart';
+
+
 
 class ChessBoard extends StatefulWidget {
   const ChessBoard({super.key});
@@ -35,6 +41,13 @@ List<chessPiece> whiteCapturedPieces = [];
 // indicating the turns 
 bool isWhiteTurn = true;
 
+// gameId
+String? currentGameId;
+
+// Firestore instance
+final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+final User? _currentUser = FirebaseAuth.instance.currentUser;
+
 // keepoing track of the kings position
 List<int> whiteKingPosition = [7, 4];
 List<int> blackKingPosition = [0, 4];
@@ -44,6 +57,24 @@ bool checkStatus = false;
 void initState() {
   super.initState();
   _initializeBoard();
+  _createNewGame();
+}
+
+// creating a new game in Firestore
+void _createNewGame() async {
+  try {
+    final docRef = await _firestore.collection('games').add({
+      'playerwhite': _currentUser?.uid,
+      'playerblack': null,
+      'moves': [],
+      'status': 'ongoing',
+      'createdAt': FieldValue.serverTimestamp(),
+      'timeControl': '5+0'
+    });
+    currentGameId = docRef.id;
+  } catch (e) {
+    debugPrint('Error creating new game: $e');
+  }
 }
 
 // Initializing the board
@@ -408,83 +439,165 @@ List<List<int>>calculateRealValidMoves (int row, int column, chessPiece ? piece,
 
 
 // moving the piece to the selected square
-void movePiece(int newRow, int newColumn){
-  // if the new spot has an enemy piece 
-  if (board[newRow][newColumn] != null) {
-    // adding the captured piece to the respective list
-    var capturedPiece = board[newRow][newColumn];
-    if (capturedPiece!.isWhite) {
-      whiteCapturedPieces.add(capturedPiece);
-    } else {
-      blackCapturedPieces.add(capturedPiece);
-    }
-  }
-
-  // move the piece to the new square
-  board[newRow][newColumn] = selectedPiece;
-  board[selectedRow][selectedColumn] = null; 
-
-  // see if any king is under attack
-  if (isKingInCheck(!isWhiteTurn)) {
-    checkStatus = true;
-  } else {
-    checkStatus = false;
-  }
-
-  // checking if the piece being moved is the king 
-  if (selectedPiece!.type == chessPieceType.king) {
-    // update the appropriate king position
-    if (selectedPiece!.isWhite) {
-      whiteKingPosition = [newRow, newColumn];
-    } else{
-      blackKingPosition = [newRow, newColumn];
-    }
-  }
-
-  // clear the selection
+void movePiece(int newRow, int newColumn) async {
+  // Make a copy of the current piece and clear the original position
+  chessPiece? movingPiece = selectedPiece;
+  
   setState(() {
-    selectedPiece = null; 
+    // Capture logic
+    if (board[newRow][newColumn] != null) {
+      var capturedPiece = board[newRow][newColumn];
+      if (capturedPiece!.isWhite) {
+        whiteCapturedPieces.add(capturedPiece);
+      } else {
+        blackCapturedPieces.add(capturedPiece);
+      }
+    }
+
+    // Move the piece
+    board[newRow][newColumn] = movingPiece;
+    board[selectedRow][selectedColumn] = null;
+
+    // Update king position if needed
+    if (movingPiece!.type == chessPieceType.king) {
+      if (movingPiece.isWhite) {
+        whiteKingPosition = [newRow, newColumn];
+      } else {
+        blackKingPosition = [newRow, newColumn];
+      }
+    }
+
+    // Check for check
+    checkStatus = isKingInCheck(!isWhiteTurn);
+    if (isCheckmate(!isWhiteTurn)) {
+      Future.delayed(Duration.zero, () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('CHECKMATE!'),
+            content: Text('${isWhiteTurn ? "White" : "Black"} wins!'),
+            actions: [
+              TextButton(
+                onPressed: resetGame,
+                child: const Text('Play Again'),
+              ),
+            ],
+          ),
+        );
+      });
+
+      _recordGameResult(isWhiteTurn);
+      return;
+    }
+    isWhiteTurn = !isWhiteTurn;
+    // Reset selection
+    selectedPiece = null;
     selectedRow = -1;
     selectedColumn = -1;
     validMoves = [];
   });
 
-// checking if its a checkmate
-  if (isCheckmate(!isWhiteTurn)) {
-    showDialog(
-      context: context, 
-      builder: (context) => AlertDialog(
-        title: const Text('CHECK MATE!'),
-        actions: [
-          TextButton(
-            onPressed: resetGame, 
-            child: const Text('Play Again?')
-          ),
-        ],
-      )
-    );
+  // Rest of your Firestore and checkmate logic...
+  if (currentGameId != null) {
+    await _firestore.collection('games').doc(currentGameId).update({
+      'moves': FieldValue.arrayUnion([_getMoveNotation(newRow, newColumn)]),
+      'lastMoveAt': FieldValue.serverTimestamp(),
+    });
+  }
+}
+
+// recording the game result in Firestore
+Future<void> _recordGameResult(bool whiteWon) async {
+  final userScore = Provider.of<UserScore>(context, listen: false);
+  if (currentGameId == null) return;
+
+  {
+    await _firestore.collection('games').doc(currentGameId).update({
+      'winner': whiteWon ? _currentUser?.uid : 'opponent',
+      'status': 'completed',
+      'endTime': FieldValue.serverTimestamp(),
+    });
+    // update the local user score
+    bool isWhite = true;
+    bool userWon = (whiteWon && isWhite) || (!whiteWon && !isWhite);
+    userScore.recordResult(isWin: userWon, isDraw: false);
+    
+    if (_currentUser != null) {
+      await _firestore.collection('users').doc(_currentUser!.uid).update({
+        'gamesPlayed': FieldValue.increment(1),
+        'gamesWon': FieldValue.increment(whiteWon ? 1 : 0),
+      });
+    }
+    
+  }
+}
+
+// notation for the move
+String _getMoveNotation(int newRow, int newColumn){
+  // converting to the chess notation
+  final fromFile = String.fromCharCode('a'.codeUnitAt(0)+selectedColumn);
+  final fromRank = (8-selectedRow).toString();
+  final toFile = String.fromCharCode('a'.codeUnitAt(0)+newColumn);
+  final toRank = (8-newRow).toString();
+  // checking if its a capture
+  bool isCapture = board[newRow][newColumn] != null;
+
+  // getting piece type
+  final pieceSymbol = selectedPiece!.type == chessPieceType.pawn
+    ? ''
+    : _getPieceSymbol(selectedPiece!);
+  
+  // building the notation
+  String notation = pieceSymbol;
+
+  // including the source file for pawns
+  if (isCapture && selectedPiece!.type == chessPieceType.pawn) {
+    notation += fromFile;
   }
 
-  // changing the turns 
-  isWhiteTurn = !isWhiteTurn;
+  // adding the capture symbol
+  if (isCapture) {
+    notation += 'x';
+  }
+
+  // adding the destination square
+  notation += toFile + toRank;
+  return notation;
 }
+  // helper function to get piece symbol
+  String _getPieceSymbol(chessPiece piece){
+    switch (piece.type) {
+      case chessPieceType.king: return 'K';
+      case chessPieceType.queen: return 'Q';
+      case chessPieceType.rook: return 'R';
+      case chessPieceType.bishop: return 'B';
+      case chessPieceType.knight: return 'N';
+      default: return '';
+    }
+  }
+
+  // checking if the king is in check
+bool isKingInCheck(bool isWhiteKing) {
+  // Get the position of the king
+  List<int> kingPosition = isWhiteKing ? whiteKingPosition : blackKingPosition;
   
-bool isKingInCheck(bool isWhiteKing){
-  // getting the position of the king
-  List<int> kingPosition = 
-      isWhiteKing ? whiteKingPosition : blackKingPosition;
-  // checking if enemy can attack the king
+  // Check all opponent pieces
   for (int i = 0; i < 8; i++) {
     for (int j = 0; j < 8; j++) {
-      // skipping empty squares and own pieces
+      // Skip empty squares and own pieces
       if (board[i][j] == null || board[i][j]!.isWhite == isWhiteKing) {
         continue;
       }
-    List<List<int>> pieceValidMoves = calculateRealValidMoves(i, j, board[i][j], false);
-    // checking if the kings position is valid
-    if (pieceValidMoves.any((move) => move[0] == kingPosition[0] && move[1] == kingPosition[1])) {
-      return true;
-    }
+      
+      // Get valid moves for this opponent piece
+      List<List<int>> pieceValidMoves = calculateValidMoves(i, j, board[i][j]);
+      
+      // Check if any move targets the king's position
+      for (var move in pieceValidMoves) {
+        if (move[0] == kingPosition[0] && move[1] == kingPosition[1]) {
+          return true;
+        }
+      }
     }
   }
   return false;
@@ -553,19 +666,28 @@ bool isCheckmate(bool isWhiteKing){
 }
 
 // resetting the game
-void resetGame(){
+void resetGame() {
   Navigator.pop(context);
-  _initializeBoard();
-  checkStatus = false;
-  whiteCapturedPieces.clear();
-  blackCapturedPieces.clear();
-  whiteKingPosition = [7, 4];
-  blackKingPosition = [0, 4];
-  isWhiteTurn = true;
+  
   setState(() {
-    
+    _initializeBoard();
+
+    checkStatus = false;
+    isWhiteTurn = true;
+
+    whiteCapturedPieces.clear();
+    blackCapturedPieces.clear();
+
+    whiteKingPosition = [7, 4];
+    blackKingPosition = [0, 4];
+
+    selectedPiece = null;
+    selectedRow = -1;
+    selectedColumn = -1;
+    validMoves = [];
   });
 }
+
 
   @override
   Widget build(BuildContext context) {
@@ -575,7 +697,7 @@ void resetGame(){
         children: [
           // profile
           Padding(
-            padding: const EdgeInsets.only(top: 30),
+            padding: const EdgeInsets.only(top: 10),
             child: GestureDetector(
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
@@ -592,7 +714,8 @@ void resetGame(){
               physics: const NeverScrollableScrollPhysics(),
               itemCount: whiteCapturedPieces.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 8), 
+              crossAxisCount: 8,
+              ), 
               itemBuilder: (context, index) => DeadPieces(
                 imagePath: whiteCapturedPieces[index].imagePath, 
                 isWhite: true,
@@ -608,15 +731,21 @@ void resetGame(){
               color: isWhiteTurn ? Colors.white : Colors.black,
             ),
           ),
-          // game status
-          Text(
-            checkStatus? 'Check!' : '',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+          // check status
+          checkStatus 
+          ? Container(
+            padding: const EdgeInsets.all(8.0),
+            color: Colors.red,
+            child: const Text(
+              'Check!',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
-          ),
-
+          )
+          : SizedBox.shrink(),
           // chess board
           Expanded(
             flex: 4,
@@ -640,12 +769,18 @@ void resetGame(){
                       
                     }
                   }
+                  // checking if the king is in check
+                  bool kingUnderCheck= false;
+                  if (board[y][x]?.type == chessPieceType.king) {
+                    kingUnderCheck = isKingInCheck(board[y][x]!.isWhite);
+                  }
                   return Square(
                     isWhite: isWhite, 
                     piece: board[y][x],
                     isSelected: isSelected,
                     isValidMove: isValidMove,
                     onTap: () => _selectedPiece(y, x),
+                    isInCheck: kingUnderCheck,
                   );
                 },
                 itemCount: 8*8,
