@@ -1,9 +1,10 @@
+import 'package:chess_app/chess_board.dart';
 import 'package:chess_app/components/textfield.dart';
 import 'package:chess_app/sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class SignUp extends StatefulWidget {
@@ -27,41 +28,86 @@ class _SignUpState extends State<SignUp> {
     super.dispose();
   }
 
-    // google sign in method 
+      // creating user doc
+  Future<void> createUserDoc(User user) async {
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final docSnapshot = await userDoc.get();
+    if (!docSnapshot.exists) {
+      await userDoc.set({
+        'email': user.email,
+        'uid': user.displayName ?? user.uid,
+        'gamesPlayed': 0,
+        'gamesWon': 0,
+        'gamesLost': 0,
+        'gamesDrawn': 0,
+        'rating': 1200, 
+      });
+    }
+  }
+
+  // google sign in method 
   Future <UserCredential?> signInWithGoogle() async {
     try {
       final googleUser = await GoogleSignIn().signIn();
-
       final googleAuth = await googleUser?.authentication;
-
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
-      return await FirebaseAuth.instance.signInWithCredential(credential);
+
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+      if (user != null) {
+        await createUserDoc(user);
+        // Navigating to chessboard
+        Navigator.pushReplacement(
+          context, 
+          MaterialPageRoute (builder: (context) => const ChessBoard())
+        );
+      }
+      return userCredential;
     } catch (e) {
-      print(e.toString());
+      print('Error signing in with Google: $e');
     }
     return null;
   }
 
   // manual sign up method
-  Future signUpMethod() async {
-   if (passwordConfirmed()) {
-     await FirebaseAuth.instance.createUserWithEmailAndPassword(
-    email: _emailController.text.trim(), 
-    password: _passwordController.text.trim(),
-   );
-   }
+  Future<void> signUpMethod() async {
+  final email = _emailController.text.trim();
+  final password = _passwordController.text.trim();
+  final confirmPassword = _confirmPasswordController.text.trim();
+
+  if (password != confirmPassword) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Passwords do not match')),
+    );
+    return;
   }
-  bool passwordConfirmed(){
-    if (_passwordController.text.trim() == _confirmPasswordController.text.trim()) {
-      return true;
-    } else {
-      return false;
-      
+
+  try {
+    UserCredential userCredential = await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email, password: password);
+
+    final user = userCredential.user;
+
+    if (user != null) {
+      await createUserDoc(user);
+
+      // Navigate to ChessBoard
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ChessBoard()),
+      );
     }
+  } catch (e) {
+    print('Error signing up: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Sign up failed: $e')),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

@@ -510,25 +510,32 @@ void movePiece(int newRow, int newColumn) async {
 Future<void> _recordGameResult(bool whiteWon) async {
   final userScore = Provider.of<UserScore>(context, listen: false);
   if (currentGameId == null) return;
-
-  {
+  try {
+    // Updating the game status
     await _firestore.collection('games').doc(currentGameId).update({
       'winner': whiteWon ? _currentUser?.uid : 'opponent',
       'status': 'completed',
       'endTime': FieldValue.serverTimestamp(),
     });
     // update the local user score
-    bool isWhite = true;
+    bool isWhite = _currentUser?.uid ==FirebaseAuth.instance.currentUser?.uid;
     bool userWon = (whiteWon && isWhite) || (!whiteWon && !isWhite);
-    userScore.recordResult(isWin: userWon, isDraw: false);
+    bool userLost = !userWon;
     
     if (_currentUser != null) {
-      await _firestore.collection('users').doc(_currentUser!.uid).update({
+      final userRef = _firestore.collection('users').doc(_currentUser!.uid);
+        await userRef.update({
         'gamesPlayed': FieldValue.increment(1),
         'gamesWon': FieldValue.increment(whiteWon ? 1 : 0),
+        'gamesLost': FieldValue.increment(userLost ? 1 : 0),
+        'rating': FieldValue.increment(userWon ? 15 : -15),
+        'gameRefs': FieldValue.arrayUnion([currentGameId!]),
       });
+      userScore.recordResult(isWin: userWon, isDraw: false);
     }
-    
+    print('Game result recorded successfully');
+  } catch (e) {
+    debugPrint('Error recording game result: $e');
   }
 }
 

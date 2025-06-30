@@ -1,6 +1,8 @@
 import 'package:chess_app/chess_board.dart';
 import 'package:chess_app/components/textfield.dart';
 import 'package:chess_app/sign_up.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -13,6 +15,7 @@ class SignIn extends StatefulWidget {
 
   @override
   State<SignIn> createState() => _SignInState();
+  
 }
 
 class _SignInState extends State<SignIn> {
@@ -26,30 +29,73 @@ class _SignInState extends State<SignIn> {
     super.dispose();
   }
 
+  // creating user doc
+  Future<void> createUserDoc(User user) async {
+    final userDoc = FirebaseFirestore.instance.collection('users').doc(user.uid);
+    final docSnapshot = await userDoc.get();
+    if (!docSnapshot.exists) {
+      await userDoc.set({
+        'email': user.email,
+        'uid': user.displayName ?? user.uid,
+        'gamesPlayed': 0,
+        'gamesWon': 0,
+        'gamesLost': 0,
+        'gamesDrawn': 0,
+        'rating': 1200, 
+      });
+    }
+  }
+
   // google sign in method 
   Future <UserCredential?> signInWithGoogle() async {
     try {
       final googleUser = await GoogleSignIn().signIn();
-
       final googleAuth = await googleUser?.authentication;
-
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth?.accessToken,
         idToken: googleAuth?.idToken,
       );
-      return await FirebaseAuth.instance.signInWithCredential(credential);
+
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+      if (user != null) {
+        await createUserDoc(user);
+        // Navigating to chessboard
+        Navigator.pushReplacement(
+          context, 
+          MaterialPageRoute (builder: (context) => const ChessBoard())
+        );
+      }
+      return userCredential;
     } catch (e) {
-      print(e.toString());
+      print('Error signing in with Google: $e');
     }
     return null;
   }
 
   // manual sign in method
   Future signInMethod() async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-    );
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(), 
+        password: _passwordController.text.trim(),
+      );
+      final user = userCredential.user;
+      if (user != null) {
+        await createUserDoc(user);
+        // Navigating to chessboard
+        Navigator.pushReplacement(
+          context, 
+          MaterialPageRoute (builder: (context) => const ChessBoard())
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid email or password'))
+        );
+      }
+    } catch (e) {
+      print('Error signing in: $e');
+    }
   }
 
   @override

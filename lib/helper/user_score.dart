@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class UserScore extends ChangeNotifier{
@@ -5,11 +7,13 @@ class UserScore extends ChangeNotifier{
   int _gamesWon = 0;
   int _gamesLost = 0;
   int _gamesDrawn = 0;
+  int _rating = 1200;
 
   int get gamesPlayed => _gamesPlayed;
   int get gamesWon => _gamesWon;
   int get gamesLost => _gamesLost;
   int get gamesDrawn => _gamesDrawn;
+  int get rating => _rating;
   
   // standard chess calculations
   double get score => _gamesWon + (_gamesDrawn * 0.5);
@@ -45,5 +49,19 @@ class UserScore extends ChangeNotifier{
     _gamesLost = 0;
     _gamesDrawn = 0;
     notifyListeners();
+  }
+
+  // adding the method to update scores
+  Future<void> loadUserStatsFirestore(String uid) async {
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    if (userDoc.exists) {
+      final data = userDoc.data();
+      _gamesPlayed = data?['gamesPlayed'] ?? 0;
+      _gamesWon = data?['gamesWon'] ?? 0;
+      _gamesLost = data?['gamesLost'] ?? 0;
+      _gamesDrawn = data?['gamesDrawn'] ?? 0;
+      _rating = data?['rating'] ?? 1200;
+      notifyListeners();
+    }
   }
 }

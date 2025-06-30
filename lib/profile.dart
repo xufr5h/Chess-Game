@@ -19,6 +19,14 @@ class _MyProfileState extends State<MyProfile> {
   void initState(){
     super.initState();
     user = FirebaseAuth.instance.currentUser;
+
+    // calling the stats method
+    if (user != null) {
+      Future.microtask((){
+        Provider.of<UserScore>(context, listen: false)
+          .loadUserStatsFirestore(user!.uid);
+      });
+    }
   }
 
     // sign out method
@@ -88,7 +96,16 @@ class _MyProfileState extends State<MyProfile> {
                 color: const Color.fromARGB(255, 83, 80, 80)
               ),
             ),
-
+            // DISPLAY ELO RATING
+            const SizedBox(height: 10),
+            Text(
+              '${context.watch<UserScore>().rating} elo',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 83, 80, 80)
+              ),
+            ),
             // statistics card
             Card(
               margin: const EdgeInsets.all(16),
