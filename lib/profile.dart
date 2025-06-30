@@ -54,7 +54,7 @@ class _MyProfileState extends State<MyProfile> {
           label,
           style: const TextStyle(
             fontSize: 14,
-            color: Color.fromARGB(255, 83, 80, 80),
+            color: Color.fromARGB(255, 255, 255, 255),
           ),
         ),
         Text(
@@ -62,7 +62,7 @@ class _MyProfileState extends State<MyProfile> {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 83, 80, 80),
+            color: Color.fromARGB(255, 255, 255, 255),
           ),
         )
       ],
@@ -72,6 +72,7 @@ class _MyProfileState extends State<MyProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 111, 78, 55),
       appBar: AppBar(
         title: const Text(
           'My Profile',
@@ -93,7 +94,7 @@ class _MyProfileState extends State<MyProfile> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
-                color: const Color.fromARGB(255, 83, 80, 80)
+                color: const Color.fromARGB(255, 255, 255, 255)
               ),
             ),
             // DISPLAY ELO RATING
@@ -103,11 +104,12 @@ class _MyProfileState extends State<MyProfile> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 83, 80, 80)
+                color: Color.fromARGB(255, 255, 255, 255)
               ),
             ),
             // statistics card
             Card(
+              color: const Color.fromARGB(255, 81, 39, 25),
               margin: const EdgeInsets.all(16),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -118,7 +120,7 @@ class _MyProfileState extends State<MyProfile> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color:  Color.fromARGB(255, 83, 80, 80)
+                        color:  Color.fromARGB(255, 255, 255, 255)
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -136,9 +138,10 @@ class _MyProfileState extends State<MyProfile> {
                     const SizedBox(height: 10),
                     // total score
                     Text(
-                      'Total Score: ${context.watch<UserScore>().score}',
+                      'Win Rate: ${context.watch<UserScore>().winRate.toStringAsFixed(1)}%',
                       style: const TextStyle(
                         fontSize: 16,
+                        color: Color.fromARGB(255, 255, 255, 255),
                       ),
                     )
                   ],

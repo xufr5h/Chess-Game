@@ -48,6 +48,7 @@ class UserScore extends ChangeNotifier{
     _gamesWon = 0;
     _gamesLost = 0;
     _gamesDrawn = 0;
+    _rating = 1200; 
     notifyListeners();
   }
 
