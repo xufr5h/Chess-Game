@@ -711,7 +711,7 @@ void resetGame() {
               },
               child: CircleAvatar(
                 radius: 30,
-                backgroundImage: const AssetImage('lib/images/cat.png'),
+                backgroundImage: const AssetImage('lib/images/cat.jpeg'),
                 ),
             ),
             ),

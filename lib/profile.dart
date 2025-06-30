@@ -1,3 +1,4 @@
+import 'package:chess_app/game_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -74,8 +75,11 @@ class _MyProfileState extends State<MyProfile> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 111, 78, 55),
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+        centerTitle: true,
         title: const Text(
           'My Profile',
+          style: TextStyle(color: Colors.white),
           ),
       ),
       body: Center(
@@ -85,7 +89,7 @@ class _MyProfileState extends State<MyProfile> {
             // profile picture
             const CircleAvatar(
               radius: 50,
-              backgroundImage: AssetImage('lib/images/cat.png'),
+              backgroundImage: AssetImage('lib/images/cat.jpeg'),
             ),
 
             // User name 
@@ -148,6 +152,27 @@ class _MyProfileState extends State<MyProfile> {
                 ),
               ),
             ),
+
+            // Game Mode Button
+            const SizedBox(height: 20),
+            MaterialButton(
+              onPressed: (){
+                Navigator.push(context, 
+                  MaterialPageRoute(
+                    builder: (context) => const GameMode(),
+                  ),
+                );
+              },
+              color: Colors.black,
+              child: const Text(
+                'Select Game Mode',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+
             // Sign out button
             const SizedBox(height: 20),
             MaterialButton(
