@@ -1,5 +1,6 @@
 import 'package:chess_app/chess_board.dart';
 import 'package:chess_app/components/input_name.dart';
+import 'package:chess_app/play_with_computer.dart';
 import 'package:chess_app/play_with_friend.dart';
 import 'package:chess_app/profile.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,16 @@ class _GameModeState extends State<GameMode> {
                   color: const Color.fromARGB(255, 81, 39, 25),
                   child: InkWell(
                     onTap: (){
-                        
+                      final user = FirebaseAuth.instance.currentUser;
+                      String email = user?.email ?? 'White';
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => 
+                           PlayWithComputer(
+                            whitePlayerEmail: email,
+                            blackPlayerName: 'Computer',
+                            ),
+                          ),
+                        );
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),

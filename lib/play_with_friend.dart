@@ -649,7 +649,6 @@ bool isCheckmate(bool isWhiteKing){
 
 // resetting the game
 void resetGame() {
-  Navigator.pop(context);
   
   setState(() {
     _initializeBoard();
@@ -783,6 +782,29 @@ void resetGame() {
               itemBuilder: (context, index) => DeadPieces(
                 imagePath: blackCapturedPieces[index].imagePath, 
                 isWhite: false,
+              ),
+            ),
+          ),
+          // retry button
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                elevation: 5,
+                shape:RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                )
+              ),
+              onPressed: resetGame, 
+              child: const Text(
+                'Retry',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
