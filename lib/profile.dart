@@ -1,4 +1,5 @@
 import 'package:chess_app/game_mode.dart';
+import 'package:chess_app/offline_game_history.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -149,6 +150,26 @@ class _MyProfileState extends State<MyProfile> {
                       ),
                     )
                   ],
+                ),
+              ),
+            ),
+            
+            // Offline Game History Button
+            const SizedBox(height: 20),
+            MaterialButton(
+              onPressed: (){
+                Navigator.push(context, 
+                  MaterialPageRoute(
+                    builder: (context) => const OfflineGameHistory(),
+                  ),
+                );
+              },
+              color: Colors.black,
+              child: const Text(
+                'Offline Game History',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
                 ),
               ),
             ),

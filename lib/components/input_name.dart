@@ -24,7 +24,6 @@ class _InputNameState extends State<InputName> {
     return;
     } 
     widget.onNameSubmitted(name);
-    Navigator.of(context).pop(); 
   }
 
   @override

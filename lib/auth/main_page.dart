@@ -1,5 +1,6 @@
 import 'package:chess_app/auth/auth_page.dart';
 import 'package:chess_app/chess_board.dart';
+import 'package:chess_app/game_mode.dart';
 import 'package:chess_app/sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +15,7 @@ class MainPage extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(), 
         builder: (context, snapshot){
           if (snapshot.hasData) {
-            return ChessBoard();
+            return GameMode();
           }
           else {
             return AuthPage();

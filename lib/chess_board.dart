@@ -694,27 +694,33 @@ void resetGame() {
     validMoves = [];
   });
 }
-
+  
 
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      backgroundColor: const Color.fromARGB(255, 122, 121, 121),
-      body: Column(
-        children: [
-          // profile
+      backgroundColor:  const Color.fromARGB(255, 111, 78, 55),
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text('Online Mode', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+        backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+        actions: [
           Padding(
-            padding: const EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(right: 20),
             child: GestureDetector(
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
               },
               child: CircleAvatar(
-                radius: 30,
-                backgroundImage: const AssetImage('lib/images/cat.jpeg'),
-                ),
+                radius: 20,
+                backgroundImage: AssetImage('lib/images/cat.jpeg'),
+              ),
             ),
-            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
           // white pieces that has been captured
           Expanded(
             child: GridView.builder(

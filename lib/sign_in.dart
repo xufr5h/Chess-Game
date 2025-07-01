@@ -1,5 +1,6 @@
 import 'package:chess_app/chess_board.dart';
 import 'package:chess_app/components/textfield.dart';
+import 'package:chess_app/game_mode.dart';
 import 'package:chess_app/sign_up.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -63,7 +64,7 @@ class _SignInState extends State<SignIn> {
         // Navigating to chessboard
         Navigator.pushReplacement(
           context, 
-          MaterialPageRoute (builder: (context) => const ChessBoard())
+          MaterialPageRoute (builder: (context) => const GameMode())
         );
       }
       return userCredential;
