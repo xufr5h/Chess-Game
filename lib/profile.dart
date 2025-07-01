@@ -48,6 +48,22 @@ class _MyProfileState extends State<MyProfile> {
     }
   }
 
+  // delete account 
+  Future<void> _deleteAccount() async {
+    try {
+      await user?.delete();
+      if (mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error deleting account: $e')),
+        );
+      }
+    }
+  }
+
   // statistics card builder
   Widget _buildStatColumn(String label, String value){
     return Column(
@@ -68,6 +84,56 @@ class _MyProfileState extends State<MyProfile> {
           ),
         )
       ],
+    );
+  }
+
+  // signout confirmation dialog
+  void _signOutConfirmation(){
+    showDialog(
+      context: context, 
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color.fromARGB(255, 81, 39, 25),
+        title: const Text('Are you sure you want to sign out?', style: TextStyle(color: Colors.white),),
+        actions: [
+          TextButton(
+            onPressed: (){
+              Navigator.of(context).pop();
+            }, 
+          child: const Text('No', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),)
+          ),
+          TextButton(
+            onPressed: (){
+              Navigator.of(context).pop();
+              _signOut();
+            }, 
+            child: const Text('Yes', style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold),)),
+        ],
+      )
+    );
+  }
+
+  // delete account confirmation dialog
+  void _deleteAccountConfirmation(){
+    showDialog(
+      context: context, 
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color.fromARGB(255, 81, 39, 25),
+        title: const Text('Are you sure you want to delete your account?', style: TextStyle(color: Colors.white),),
+        actions: [
+          TextButton(
+            onPressed: (){
+              Navigator.of(context).pop();
+            }, 
+          child: const Text('No', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),)
+          ),
+          TextButton(
+            onPressed: (){
+              Navigator.of(context).pop();
+              _deleteAccount();
+            }, 
+            child: const Text('Yes', style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold),)),
+        ],
+      )
     );
   }
 
@@ -197,9 +263,24 @@ class _MyProfileState extends State<MyProfile> {
             // Sign out button
             const SizedBox(height: 20),
             MaterialButton(
-              onPressed: _signOut,
+              onPressed: _signOutConfirmation,
               color: Colors.black,
               child:  Text('Sign Out',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+
+            // delete account button
+            // Sign out button
+            const SizedBox(height: 20),
+            MaterialButton(
+              onPressed: _deleteAccountConfirmation,
+              color: Colors.red,
+              child:  Text(
+                'Delete Account?',
                 style: TextStyle(
                   fontSize: 18,
                   color: Colors.white,

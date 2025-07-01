@@ -1,5 +1,6 @@
 import 'package:chess_app/chess_board.dart';
 import 'package:chess_app/components/textfield.dart';
+import 'package:chess_app/forgot_password.dart';
 import 'package:chess_app/game_mode.dart';
 import 'package:chess_app/sign_up.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -148,8 +149,27 @@ class _SignInState extends State<SignIn> {
                   hintText: "Password",
                   obscuretext: true,
                 ),
+
+                // forgot password
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      GestureDetector(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=> const ForgotPassword()));
+                        },
+                        child: Text('Forgot Password?',
+                          style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 46, 54, 141), fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
             
-                const SizedBox(height: 30),
+                const SizedBox(height: 10),
             
                 // Sign in button
                 ElevatedButton(
@@ -166,14 +186,14 @@ class _SignInState extends State<SignIn> {
                   ),
                 ),
             
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
                 // Or Text
                 const Text(
                   'OR',
                   style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 38, 35, 35), fontWeight: FontWeight.bold),
                 ),
                 // Continue with Google Button
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () async{
                     await signInWithGoogle();
