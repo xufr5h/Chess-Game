@@ -239,27 +239,7 @@ class _MyProfileState extends State<MyProfile> {
                 ),
               ),
             ),
-
-            // Game Mode Button
-            const SizedBox(height: 20),
-            MaterialButton(
-              onPressed: (){
-                Navigator.push(context, 
-                  MaterialPageRoute(
-                    builder: (context) => const GameMode(),
-                  ),
-                );
-              },
-              color: Colors.black,
-              child: const Text(
-                'Select Game Mode',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-
+            
             // Sign out button
             const SizedBox(height: 20),
             MaterialButton(

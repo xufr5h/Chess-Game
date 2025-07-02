@@ -2,6 +2,7 @@ import 'package:chess_app/components/dead_pieces.dart';
 import 'package:chess_app/components/input_name.dart';
 import 'package:chess_app/components/pieces.dart';
 import 'package:chess_app/components/square.dart';
+import 'package:chess_app/game_mode.dart';
 import 'package:chess_app/helper/offline_game_record.dart';
 import 'package:chess_app/profile.dart';
 import 'package:flutter/material.dart';
@@ -671,6 +672,58 @@ void resetGame() {
   });
 }
 
+void homeConfirmation(){
+  showDialog(
+    context: context, 
+    builder: (context) => AlertDialog(
+      backgroundColor: const Color.fromARGB(255, 81, 39, 25),
+      title: const Text('Are you sure you want to reset the game?', style: TextStyle(color: Colors.white, fontSize: 20),),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Cancel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.push(
+              context, 
+              MaterialPageRoute(builder: (context) => const GameMode()),
+            );
+          },
+          child: const Text('Yes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+      ],
+    ),
+  );
+}
+
+// confirmation dialog for reset button
+void resetConfirmation(){
+  showDialog(
+    context: context, 
+    builder: (context) => AlertDialog(
+      backgroundColor: const Color.fromARGB(255, 81, 39, 25),
+      title: const Text('Are you sure you want to reset the game?', style: TextStyle(color: Colors.white, fontSize: 20),),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Cancel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+        TextButton(
+          onPressed: (){
+            Navigator.pop(context);
+            resetGame();
+          },
+          child: const Text('Yes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -680,20 +733,6 @@ void resetGame() {
         centerTitle: true,
         title: const Text('Friendly Match', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
         backgroundColor: const Color.fromARGB(255, 111, 78, 55),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: GestureDetector(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
-              },
-              child: CircleAvatar(
-                radius: 20,
-                backgroundImage: AssetImage('lib/images/cat.jpeg'),
-              ),
-            ),
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -787,29 +826,48 @@ void resetGame() {
               ),
             ),
           ),
-          // retry button
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10.0),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                elevation: 5,
-                shape:RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                )
-              ),
-              onPressed: resetGame, 
-              child: const Text(
-                'Retry',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+
+          // footer
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 81, 39, 25),
+              boxShadow: [
+                BoxShadow(
+                  color: Color.fromRGBO(0, 0, 0, 0.2),
+                  spreadRadius: 2,
+                  blurRadius: 5,
                 ),
-              ),
+              ],
             ),
-          ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Home
+                GestureDetector(
+                  onTap: homeConfirmation,
+                  child: Icon(Icons.home, color: const Color.fromARGB(255, 0, 0, 0), size: 40,),
+                    
+                ),
+                // Reset
+                GestureDetector(
+                  onTap: resetConfirmation,
+                  child: Icon(Icons.refresh, color: const Color.fromARGB(255, 0, 0, 0), size: 40, ),
+                ),
+                // Profile
+                GestureDetector(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
+                  },
+                  child: CircleAvatar(
+                    radius: 20,
+                    backgroundImage: AssetImage('lib/images/cat.jpeg'),
+                  )
+                  
+                )
+              ],
+            ),
+          )
         ],
       ),
     );

@@ -16,153 +16,211 @@ class GameMode extends StatefulWidget {
 class _GameModeState extends State<GameMode> {
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       backgroundColor: const Color.fromARGB(255, 111, 78, 55),
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Game Mode', style: TextStyle(color: Colors.white),),
+        title: const Text(
+          'Game Mode',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: const Color.fromARGB(255, 111, 78, 55),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: GestureDetector(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
-              },
-              child: CircleAvatar(
-                radius: 20,
-                backgroundImage: AssetImage('lib/images/cat.jpeg'),
+      ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Scrollable game cards
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  // Play with Computer
+                  SizedBox(
+                    width: 300,
+                    height: 200,
+                    child: Card(
+                      elevation: 4,
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 20),
+                      color: const Color.fromARGB(255, 81, 39, 25),
+                      child: InkWell(
+                        onTap: () {
+                          final user = FirebaseAuth.instance.currentUser;
+                          String email = user?.email ?? 'White';
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PlayWithComputer(
+                                whitePlayerEmail: email,
+                                blackPlayerName: 'Computer',
+                              ),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 16),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.computer,
+                                  size: 50, color: Colors.white),
+                              SizedBox(height: 10),
+                              Text(
+                                'Play with Computer',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Play with Friend
+                  SizedBox(
+                    width: 300,
+                    height: 200,
+                    child: Card(
+                      elevation: 4,
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 20),
+                      color: const Color.fromARGB(255, 81, 39, 25),
+                      child: InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => InputName(
+                              onNameSubmitted: (playerName) {
+                                Navigator.of(context).pop();
+                                final user =
+                                    FirebaseAuth.instance.currentUser;
+                                String email = user?.email ?? 'White';
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PlayWithFriend(
+                                      blackPlayerName: playerName,
+                                      whitePlayerEmail: email,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 16),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.person,
+                                  size: 50, color: Colors.white),
+                              SizedBox(height: 10),
+                              Text(
+                                'Play with Friend',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Online Mode
+                  SizedBox(
+                    width: 300,
+                    height: 200,
+                    child: Card(
+                      elevation: 4,
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 20),
+                      color: const Color.fromARGB(255, 81, 39, 25),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ChessBoard()),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 16),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.wifi, size: 50, color: Colors.white),
+                              SizedBox(height: 10),
+                              Text(
+                                'Online Mode',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 300,
-                height: 200,
-                child: Card(
-                  elevation: 4,
-                  margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                  color: const Color.fromARGB(255, 81, 39, 25),
-                  child: InkWell(
-                    onTap: (){
-                      final user = FirebaseAuth.instance.currentUser;
-                      String email = user?.email ?? 'White';
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (context) => 
-                           PlayWithComputer(
-                            whitePlayerEmail: email,
-                            blackPlayerName: 'Computer',
-                            ),
-                          ),
-                        );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.computer, size: 50, color: const Color.fromARGB(255, 255, 255, 255)),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Play with Computer',
-                            style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
+          // Footer at the bottom
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 81, 39, 25),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color.fromRGBO(0, 0, 0, 0.2),
+                  spreadRadius: 2,
+                  blurRadius: 5,
                 ),
-              ),
-              // play with frined
-              const SizedBox(height: 20),
-               SizedBox(
-                width: 300,
-                height: 200,
-                 child: Card(
-                  elevation: 4,
-                  margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                  color: const Color.fromARGB(255, 81, 39, 25),
-                  child: InkWell(
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Home
+                GestureDetector(
                   onTap: () {
-                      print("Tapped Play with Friend");
-                      showDialog(
-                        context: context,
-                        builder: (context) => InputName(
-                          onNameSubmitted: (playerName) {
-                            print("Name submitted: $playerName");
-                            Navigator.of(context).pop();
-                            final user = FirebaseAuth.instance.currentUser;
-                            String email = user?.email ?? 'White';
-                            print("Current user email: $email");
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PlayWithFriend(
-                                  blackPlayerName: playerName,
-                                  whitePlayerEmail: email,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.person, size: 50, color: const Color.fromARGB(255, 255, 255, 255)),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Play with Friend',
-                            style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                             ),
-               ),
-        
-              //  online mode
-              SizedBox(
-                width: 300,
-                height: 200,
-                child: Card(
-                  elevation: 4,
-                  margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                  color: const Color.fromARGB(255, 81, 39, 25),
-                  child: InkWell(
-                    onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const ChessBoard()));
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.wifi, size: 50, color: const Color.fromARGB(255, 255, 255, 255)),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Online Mode',
-                            style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const GameMode()),
+                    );
+                  },
+                  child: const Icon(Icons.home,
+                      color: Colors.black, size: 40),
                 ),
-              ),
-            ],
+                // Profile
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const MyProfile()),
+                    );
+                  },
+                  child: const CircleAvatar(
+                    radius: 20,
+                    backgroundImage: AssetImage('lib/images/cat.jpeg'),
+                  ),
+                )
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

@@ -24,12 +24,10 @@ class Square extends StatelessWidget {
   Widget build(BuildContext context) {
     Color? squareColor;
     Color? borderColor;
-    double borderWidth = 0.0;
+    double borderWidth = 1;
     if (isSelected) {
-      squareColor = Colors.green;
-    } else if(isValidMove){
-      squareColor = const Color.fromARGB(255, 125, 242, 129);
-    }
+      squareColor = Colors.green.withAlpha(150);
+    } 
     else {
       squareColor = isWhite ? const Color.fromARGB(255, 161, 151, 151) : const Color.fromARGB(255, 89, 38, 20);
     }
@@ -50,9 +48,26 @@ class Square extends StatelessWidget {
           width: borderWidth,
         ),
         ),
-        child: piece != null ? Image.asset(
-          piece!.imagePath, 
-          color: piece!.isWhite? Colors.white : Colors.black) : null,
+        child: Stack(
+          children: [ 
+            Container(
+            child: piece != null ? Image.asset(
+              piece!.imagePath, 
+              color: piece!.isWhite? Colors.white : Colors.black) : null,
+          ),
+          if (isValidMove && piece == null)
+            Center(
+              child: Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: Colors.lightGreenAccent.withAlpha(150),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            )
+          ]
+        ),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:chess_app/components/dead_pieces.dart';
 import 'package:chess_app/components/input_name.dart';
 import 'package:chess_app/components/pieces.dart';
 import 'package:chess_app/components/square.dart';
+import 'package:chess_app/game_mode.dart';
 import 'package:chess_app/helper/offline_game_record.dart';
 import 'package:chess_app/profile.dart';
 import 'package:flutter/material.dart';
@@ -677,6 +678,60 @@ void resetGame() {
   });
 }
 
+// confirmation dialog for home button
+void homeConfirmation(){
+  showDialog(
+    context: context, 
+    builder: (context) => AlertDialog(
+      backgroundColor: const Color.fromARGB(255, 81, 39, 25),
+      title: const Text('Are you sure you want to reset the game?', style: TextStyle(color: Colors.white, fontSize: 20),),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Cancel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.push(
+              context, 
+              MaterialPageRoute(builder: (context) => const GameMode()),
+            );
+          },
+          child: const Text('Yes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+      ],
+    ),
+  );
+}
+
+// confirmation dialog for reset button
+void resetConfirmation(){
+  showDialog(
+    context: context, 
+    builder: (context) => AlertDialog(
+      backgroundColor: const Color.fromARGB(255, 81, 39, 25),
+      title: const Text('Are you sure you want to reset the game?', style: TextStyle(color: Colors.white, fontSize: 20),),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Cancel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+        TextButton(
+          onPressed: (){
+            Navigator.pop(context);
+            resetGame();
+          },
+          child: const Text('Yes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+      ],
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -686,140 +741,195 @@ void resetGame() {
         centerTitle: true,
         title: const Text('Playing With Computer', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
         backgroundColor: const Color.fromARGB(255, 111, 78, 55),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: GestureDetector(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
-              },
-              child: CircleAvatar(
-                radius: 20,
-                backgroundImage: AssetImage('lib/images/cat.jpeg'),
-              ),
-            ),
-          ),
-        ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // dead pieces
-          Expanded(
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: whiteCapturedPieces.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 8,
-              ), 
-              itemBuilder: (context, index) => DeadPieces(
-                imagePath: whiteCapturedPieces[index].imagePath, 
-                isWhite: true,
+           Column(
+          children: [
+            const SizedBox(height: 20),
+            // game turn
+             // Computer
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: const DecorationImage(
+                        image: AssetImage('lib/images/computer.jpeg'),
+                        fit: BoxFit.cover,
+                      ),
+                      boxShadow: !isWhiteTurn
+                          ? [
+                              const BoxShadow(
+                                color: Colors.lightGreenAccent,
+                                spreadRadius: 2,
+                                blurRadius: 0,
+                              ),
+                            ]
+                          : null,
+                    ), 
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    'Computer',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: !isWhiteTurn ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          // game turn
-          Text(
-            isWhiteTurn ? "$whitePlayerEmail's Turn" : "$blackPlayerName's Turn",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: isWhiteTurn ? Colors.white : Colors.black,
-            ),
-          ),
-          // check status
-          checkStatus 
-          ? Container(
-            padding: const EdgeInsets.all(8.0),
-            color: Colors.red,
-            child: const Text(
-              'Check!',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          )
-          : SizedBox.shrink(),
-          // chess board
-          Expanded(
-            flex: 4,
-            child: GridView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 8,),
-                itemBuilder: (context, index) {
-                  int x = index % 8; //this is for the column
-                  int y = index ~/ 8; // this is for the row
-            
-                  bool isWhite = (x + y) % 2 == 0; // Checking if the square is white or brown
-                  // checking if the square is selected
-                  bool isSelected = (selectedRow == y && selectedColumn == x);
-                  // checking if the square is a valid move
-                  bool isValidMove = false;
-                  for (var position in validMoves) {
-                    if (position[0] == y && position[1] == x) {
-                      isValidMove = true;
-                      break;
-                      
-                    }
-                  }
-                  // checking if the king is in check
-                  bool kingUnderCheck= false;
-                  if (board[y][x]?.type == chessPieceType.king) {
-                    kingUnderCheck = isKingInCheck(board[y][x]!.isWhite);
-                  }
-                  return Square(
-                    isWhite: isWhite, 
-                    piece: board[y][x],
-                    isSelected: isSelected,
-                    isValidMove: isValidMove,
-                    onTap: () {
-                      if (isWhiteTurn) _selectedPiece(y, x);
-                    },
-                    isInCheck: kingUnderCheck,
-                  );
-                },
-                itemCount: 8*8,
-              ),
-          ),
-          // dead pieces for black
-          Expanded(
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: blackCapturedPieces.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 8), 
-              itemBuilder: (context, index) => DeadPieces(
-                imagePath: blackCapturedPieces[index].imagePath, 
-                isWhite: false,
-              ),
-            ),
-          ),
-          // retry button
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10.0),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                elevation: 5,
-                shape:RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                )
-              ),
-              onPressed: resetGame, 
+            SizedBox(height: 60),
+            // check status
+            checkStatus 
+            ? Container(
+              padding: const EdgeInsets.all(8.0),
+              color: Colors.red,
               child: const Text(
-                'Retry',
+                'Check!',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
+            )
+            : SizedBox.shrink(),
+            // chess board
+            Expanded(
+              flex: 4,
+              child: GridView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 8,),
+                  itemBuilder: (context, index) {
+                    int x = index % 8; //this is for the column
+                    int y = index ~/ 8; // this is for the row
+              
+                    bool isWhite = (x + y) % 2 == 0; // Checking if the square is white or brown
+                    // checking if the square is selected
+                    bool isSelected = (selectedRow == y && selectedColumn == x);
+                    // checking if the square is a valid move
+                    bool isValidMove = false;
+                    for (var position in validMoves) {
+                      if (position[0] == y && position[1] == x) {
+                        isValidMove = true;
+                        break;
+                        
+                      }
+                    }
+                    // checking if the king is in check
+                    bool kingUnderCheck= false;
+                    if (board[y][x]?.type == chessPieceType.king) {
+                      kingUnderCheck = isKingInCheck(board[y][x]!.isWhite);
+                    }
+                    return Square(
+                      isWhite: isWhite, 
+                      piece: board[y][x],
+                      isSelected: isSelected,
+                      isValidMove: isValidMove,
+                      onTap: () {
+                        if (isWhiteTurn) _selectedPiece(y, x);
+                      },
+                      isInCheck: kingUnderCheck,
+                    );
+                  },
+                  itemCount: 8*8,
+                ),
             ),
-          ),
-        ],
+            // white player
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: const DecorationImage(
+                        image: AssetImage('lib/images/cat.jpeg'),
+                        fit: BoxFit.cover,
+                      ),
+                      boxShadow: isWhiteTurn
+                          ? [
+                              const BoxShadow(
+                                color: Colors.lightGreenAccent,
+                                spreadRadius: 2,
+                                blurRadius: 0,
+                              ),
+                            ]
+                          : null,
+                    ), 
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    whitePlayerEmail,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isWhiteTurn ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 80),
+             // footer
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 81, 39, 25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color.fromRGBO(0, 0, 0, 0.2),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Home
+                  GestureDetector(
+                    onTap: homeConfirmation,
+                    child: Icon(Icons.home, color: const Color.fromARGB(255, 0, 0, 0), size: 40,),
+                      
+                  ),
+                  // Reset
+                  GestureDetector(
+                    onTap: resetConfirmation,
+                    child: Icon(Icons.refresh, color: const Color.fromARGB(255, 0, 0, 0), size: 40, ),
+                  ),
+                  // Profile
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
+                    },
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: AssetImage('lib/images/cat.jpeg'),
+                    )
+                    
+                  )
+                ],
+              ),
+            ),
+
+            // Turn indicator
+           
+            
+          ],
+        ),
+      ]
       ),
     );
   }
