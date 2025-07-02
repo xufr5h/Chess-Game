@@ -458,18 +458,18 @@ void movePiece(int newRow, int newColumn) async {
     }
     final bool currentPlayerIsWhite = isWhiteTurn;
 
-    // storing the game locally
+    
+
+    // Check for check
+    checkStatus = isKingInCheck(!currentPlayerIsWhite);
+    if (isCheckmate(!currentPlayerIsWhite)) {
+      // storing the game locally
     _storeGameLocally(
       player1: whitePlayerEmail, 
       player2: blackPlayerName, 
       result: currentPlayerIsWhite ? '$whitePlayerEmail wins' : '$blackPlayerName wins', 
       playedAt: DateTime.now(),
-      moves: moveHistory,
     );
-
-    // Check for check
-    checkStatus = isKingInCheck(!currentPlayerIsWhite);
-    if (isCheckmate(!currentPlayerIsWhite)) {
       Future.delayed(Duration.zero, () {
         showDialog(
           context: context,
@@ -478,10 +478,14 @@ void movePiece(int newRow, int newColumn) async {
             content: Text('${currentPlayerIsWhite ? whitePlayerEmail : blackPlayerName} wins!'),
             actions: [
               TextButton(
-                onPressed: resetGame,
+                onPressed: (){
+                  Navigator.of(context).pop();
+                  resetGame();
+                },
                 child: const Text('Play Again'),
               ),
             ],
+            
           ),
         );
       });
@@ -501,15 +505,13 @@ Future<void> _storeGameLocally({
   required String player2,
   required String result,
   required DateTime playedAt,
-  required List<String> moves,
 }) async {
   final box = Hive.box<OfflineGameRecord>('humanGameRecords');
   final game = OfflineGameRecord(
     player1: player1, 
     player2: player2, 
     result: result, 
-    playedAt: DateTime.now(), 
-    moves: moves);
+    playedAt: DateTime.now(),);
     await box.add(game);
     debugPrint("Game saved Locally");
 }

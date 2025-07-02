@@ -63,7 +63,7 @@ class _SignUpState extends State<SignUp> {
         // Navigating to chessboard
         Navigator.pushReplacement(
           context, 
-          MaterialPageRoute (builder: (context) => const ChessBoard())
+          MaterialPageRoute (builder: (context) => const GameMode())
         );
       }
       return userCredential;

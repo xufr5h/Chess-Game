@@ -460,15 +460,6 @@ void movePiece(int newRow, int newColumn) async {
     }
     final bool currentPlayerIsWhite = isWhiteTurn;
 
-    // storing the game locally
-    _storeGameLocally(
-      player1: whitePlayerEmail, 
-      player2: blackPlayerName, 
-      result: currentPlayerIsWhite ? '$whitePlayerEmail wins' : '$blackPlayerName wins', 
-      playedAt: DateTime.now(),
-      moves: moveHistory,
-    );
-
     // Check for check
     checkStatus = isKingInCheck(!currentPlayerIsWhite);
     if (isCheckmate(!currentPlayerIsWhite)) {
@@ -530,24 +521,6 @@ void _makeComputerMove(){
   }
 }
 
-// storing the game locally in Hive
-Future<void> _storeGameLocally({
-  required String player1,
-  required String player2,
-  required String result,
-  required DateTime playedAt,
-  required List<String> moves,
-}) async {
-  final box = Hive.box<OfflineGameRecord>('humanGameRecords');
-  final game = OfflineGameRecord(
-    player1: player1, 
-    player2: player2, 
-    result: result, 
-    playedAt: DateTime.now(), 
-    moves: moves);
-    await box.add(game);
-    debugPrint("Game saved Locally");
-}
 
 // notation for the move
 String _getMoveNotation(int newRow, int newColumn){

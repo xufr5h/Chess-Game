@@ -88,7 +88,7 @@ class _SignInState extends State<SignIn> {
         // Navigating to chessboard
         Navigator.pushReplacement(
           context, 
-          MaterialPageRoute (builder: (context) => const ChessBoard())
+          MaterialPageRoute (builder: (context) => const GameMode())
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
