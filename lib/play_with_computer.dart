@@ -684,7 +684,7 @@ void homeConfirmation(){
     context: context, 
     builder: (context) => AlertDialog(
       backgroundColor: const Color.fromARGB(255, 81, 39, 25),
-      title: const Text('Are you sure you want to reset the game?', style: TextStyle(color: Colors.white, fontSize: 20),),
+      title: const Text('Are you sure you want to go back to the home page?', style: TextStyle(color: Colors.white, fontSize: 20),),
       actions: [
         TextButton(
           onPressed: () {

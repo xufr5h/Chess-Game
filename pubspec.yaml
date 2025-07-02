@@ -79,6 +79,8 @@ flutter:
   - lib/images/logo.png
   - lib/images/cat.jpeg
   - lib/images/computer.jpeg
+  - lib/images/blackPlayer.jpeg
+  - lib/images/online.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

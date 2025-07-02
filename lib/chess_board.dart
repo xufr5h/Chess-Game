@@ -732,137 +732,184 @@ void homeConfirmation(){
         title: const Text('Online Mode', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
         backgroundColor: const Color.fromARGB(255, 111, 78, 55),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // white pieces that has been captured
-          Expanded(
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: whiteCapturedPieces.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 8,
-              ), 
-              itemBuilder: (context, index) => DeadPieces(
-                imagePath: whiteCapturedPieces[index].imagePath, 
-                isWhite: true,
+          Column(
+          children: [
+            // white pieces that has been captured
+            const SizedBox(height: 20),
+            // game turn
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Row(
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: const DecorationImage(
+                        image: AssetImage('lib/images/online.jpeg'),
+                        fit: BoxFit.cover,
+                      ),
+                      boxShadow: !isWhiteTurn
+                          ? [
+                              const BoxShadow(
+                                color: Colors.lightGreenAccent,
+                                spreadRadius: 2,
+                                blurRadius: 0,
+                              ),
+                            ]
+                          : null,
+                    ), 
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    'Black Player',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: !isWhiteTurn ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          // game turn
-          Text(
-            isWhiteTurn ? "White's Turn" : "Black's Turn",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: isWhiteTurn ? Colors.white : Colors.black,
-            ),
-          ),
-          // check status
-          checkStatus 
-          ? Container(
-            padding: const EdgeInsets.all(8.0),
-            color: Colors.red,
-            child: const Text(
-              'Check!',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            SizedBox(height: 60),
+            // check status
+            checkStatus 
+            ? Container(
+              padding: const EdgeInsets.all(8.0),
+              color: Colors.red,
+              child: const Text(
+                'Check!',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
-            ),
-          )
-          : SizedBox.shrink(),
-          // chess board
-          Expanded(
-            flex: 4,
-            child: GridView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 8,),
-                itemBuilder: (context, index) {
-                  int x = index % 8; //this is for the column
-                  int y = index ~/ 8; // this is for the row
-            
-                  bool isWhite = (x + y) % 2 == 0; // Checking if the square is white or brown
-                  // checking if the square is selected
-                  bool isSelected = (selectedRow == y && selectedColumn == x);
-                  // checking if the square is a valid move
-                  bool isValidMove = false;
-                  for (var position in validMoves) {
-                    if (position[0] == y && position[1] == x) {
-                      isValidMove = true;
-                      break;
-                      
+            )
+            : SizedBox.shrink(),
+            // chess board
+            Expanded(
+              flex: 4,
+              child: GridView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 8,),
+                  itemBuilder: (context, index) {
+                    int x = index % 8; //this is for the column
+                    int y = index ~/ 8; // this is for the row
+              
+                    bool isWhite = (x + y) % 2 == 0; // Checking if the square is white or brown
+                    // checking if the square is selected
+                    bool isSelected = (selectedRow == y && selectedColumn == x);
+                    // checking if the square is a valid move
+                    bool isValidMove = false;
+                    for (var position in validMoves) {
+                      if (position[0] == y && position[1] == x) {
+                        isValidMove = true;
+                        break;
+                        
+                      }
                     }
-                  }
-                  // checking if the king is in check
-                  bool kingUnderCheck= false;
-                  if (board[y][x]?.type == chessPieceType.king) {
-                    kingUnderCheck = isKingInCheck(board[y][x]!.isWhite);
-                  }
-                  return Square(
-                    isWhite: isWhite, 
-                    piece: board[y][x],
-                    isSelected: isSelected,
-                    isValidMove: isValidMove,
-                    onTap: () => _selectedPiece(y, x),
-                    isInCheck: kingUnderCheck,
-                  );
-                },
-                itemCount: 8*8,
-              ),
-          ),
-          Expanded(
-            child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: blackCapturedPieces.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 8), 
-              itemBuilder: (context, index) => DeadPieces(
-                imagePath: blackCapturedPieces[index].imagePath, 
-                isWhite: false,
-              ),
-            ),
-          ),
-
-          // footer
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 81, 39, 25),
-              boxShadow: [
-                BoxShadow(
-                  color: Color.fromRGBO(0, 0, 0, 0.2),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Home
-                GestureDetector(
-                  onTap: homeConfirmation,
-                  child: Icon(Icons.home, color: const Color.fromARGB(255, 0, 0, 0), size: 40,),
-                    
-                ),
-    
-                // Profile
-                GestureDetector(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
+                    // checking if the king is in check
+                    bool kingUnderCheck= false;
+                    if (board[y][x]?.type == chessPieceType.king) {
+                      kingUnderCheck = isKingInCheck(board[y][x]!.isWhite);
+                    }
+                    return Square(
+                      isWhite: isWhite, 
+                      piece: board[y][x],
+                      isSelected: isSelected,
+                      isValidMove: isValidMove,
+                      onTap: () => _selectedPiece(y, x),
+                      isInCheck: kingUnderCheck,
+                    );
                   },
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundImage: AssetImage('lib/images/cat.jpeg'),
-                  )
-                  
-                )
-              ],
+                  itemCount: 8*8,
+                ),
             ),
-          )
-        ],
+            // white player
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          image: const DecorationImage(
+                            image: AssetImage('lib/images/cat.jpeg'),
+                            fit: BoxFit.cover,
+                          ),
+                          boxShadow: isWhiteTurn
+                              ? [
+                                  const BoxShadow(
+                                    color: Colors.lightGreenAccent,
+                                    spreadRadius: 2,
+                                    blurRadius: 0,
+                                  ),
+                                ]
+                              : null,
+                        ), 
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        'White Player',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isWhiteTurn ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+          
+              const SizedBox(height: 80),
+            // footer
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 81, 39, 25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color.fromRGBO(0, 0, 0, 0.2),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Home
+                  GestureDetector(
+                    onTap: homeConfirmation,
+                    child: Icon(Icons.home, color: const Color.fromARGB(255, 0, 0, 0), size: 40,),
+                      
+                  ),
+            
+                  // Profile
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
+                    },
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: AssetImage('lib/images/cat.jpeg'),
+                    )
+                    
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
+        ]
       ),
     );
   }
