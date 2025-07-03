@@ -1,28 +1,28 @@
-import 'dart:math';
-
 import 'package:chess_app/components/dead_pieces.dart';
-import 'package:chess_app/components/input_name.dart';
 import 'package:chess_app/components/pieces.dart';
 import 'package:chess_app/components/square.dart';
-import 'package:chess_app/game_mode.dart';
-import 'package:chess_app/helper/offline_game_record.dart';
-import 'package:chess_app/profile.dart';
-import 'package:flutter/material.dart';
+import 'package:chess_app/modes/game_mode.dart';
 import 'package:chess_app/helper/helper_method.dart';
+import 'package:chess_app/profile/game_stats.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
+import '../helper/user_score.dart';
+import 'package:chess_app/profile/profile.dart';
 
-class PlayWithComputer extends StatefulWidget {
-  final String whitePlayerEmail;
-  final String blackPlayerName;
-  const PlayWithComputer({super.key, required this.whitePlayerEmail, required this.blackPlayerName});
+
+
+class ChessBoard extends StatefulWidget {
+  const ChessBoard({super.key});
 
   @override
-  State<PlayWithComputer> createState() => _PlayWithComputerState();
+  State<ChessBoard> createState() => _ChessBoardState();
 }
 
-class _PlayWithComputerState extends State<PlayWithComputer> {
-    // creating a 2D chess list representing the chess board
+class _ChessBoardState extends State<ChessBoard> {
+
+// creating a 2D chess list representing the chess board
  late List<List<chessPiece?>> board;
 
 //  selected piece on the board
@@ -40,34 +40,44 @@ List<chessPiece> blackCapturedPieces = [];
 // list of white pieces that has been captured
 List<chessPiece> whiteCapturedPieces = []; 
 
-// List of the moves
-List<String> moveHistory = [];
-
 // indicating the turns 
 bool isWhiteTurn = true;
 
 // gameId
 String? currentGameId;
 
+// Firestore instance
+final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+final User? _currentUser = FirebaseAuth.instance.currentUser;
+
 // keepoing track of the kings position
 List<int> whiteKingPosition = [7, 4];
 List<int> blackKingPosition = [0, 4];
 bool checkStatus = false; 
 
-// Defaul black fallback
-String blackPlayerName = 'Computer';
-String whitePlayerEmail = ' ';
-
 @override
 void initState() {
   super.initState();
   _initializeBoard();
-  
-  blackPlayerName = widget.blackPlayerName;
-  whitePlayerEmail = widget.whitePlayerEmail;
-
+  _createNewGame();
 }
 
+// creating a new game in Firestore
+void _createNewGame() async {
+  try {
+    final docRef = await _firestore.collection('games').add({
+      'playerwhite': _currentUser?.uid,
+      'playerblack': null,
+      'moves': [],
+      'status': 'ongoing',
+      'createdAt': FieldValue.serverTimestamp(),
+      'timeControl': '5+0'
+    });
+    currentGameId = docRef.id;
+  } catch (e) {
+    debugPrint('Error creating new game: $e');
+  }
+}
 
 // Initializing the board
 void _initializeBoard() {
@@ -432,6 +442,9 @@ List<List<int>>calculateRealValidMoves (int row, int column, chessPiece ? piece,
 
 // moving the piece to the selected square
 void movePiece(int newRow, int newColumn) async {
+  // Make a copy of the current piece and clear the original position
+  chessPiece? movingPiece = selectedPiece;
+  
   setState(() {
     // Capture logic
     if (board[newRow][newColumn] != null) {
@@ -444,32 +457,27 @@ void movePiece(int newRow, int newColumn) async {
     }
 
     // Move the piece
-    board[newRow][newColumn] = selectedPiece;
+    board[newRow][newColumn] = movingPiece;
     board[selectedRow][selectedColumn] = null;
 
-    // move notation
-    String notation = _getMoveNotation(newRow, newColumn);
-    moveHistory.add(notation);
-
     // Update king position if needed
-    if (selectedPiece!.type == chessPieceType.king) {
-      if (selectedPiece!.isWhite) {
+    if (movingPiece!.type == chessPieceType.king) {
+      if (movingPiece.isWhite) {
         whiteKingPosition = [newRow, newColumn];
       } else {
         blackKingPosition = [newRow, newColumn];
       }
     }
-    final bool currentPlayerIsWhite = isWhiteTurn;
 
     // Check for check
-    checkStatus = isKingInCheck(!currentPlayerIsWhite);
-    if (isCheckmate(!currentPlayerIsWhite)) {
+    checkStatus = isKingInCheck(!isWhiteTurn);
+    if (isCheckmate(!isWhiteTurn)) {
       Future.delayed(Duration.zero, () {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('CHECKMATE!'),
-            content: Text('${currentPlayerIsWhite ? whitePlayerEmail : blackPlayerName} wins!'),
+            content: Text('${isWhiteTurn ? "White" : "Black"} wins!'),
             actions: [
               TextButton(
                 onPressed: resetGame,
@@ -479,49 +487,59 @@ void movePiece(int newRow, int newColumn) async {
           ),
         );
       });
+
+      _recordGameResult(isWhiteTurn);
+      return;
     }
     isWhiteTurn = !isWhiteTurn;
-    if (!isWhiteTurn) {
-      Future.delayed(const Duration(seconds: 1), _makeComputerMove);
-    }
     // Reset selection
     selectedPiece = null;
     selectedRow = -1;
     selectedColumn = -1;
     validMoves = [];
   });
+
+  // Rest of your Firestore and checkmate logic...
+  if (currentGameId != null) {
+    await _firestore.collection('games').doc(currentGameId).update({
+      'moves': FieldValue.arrayUnion([_getMoveNotation(newRow, newColumn)]),
+      'lastMoveAt': FieldValue.serverTimestamp(),
+    });
+  }
 }
 
-// making computer move 
-void _makeComputerMove(){
-  List<Map<String, dynamic>> allMoves = [];
-  // iterating through every square on the board
-  for (int row = 0; row < 8; row++) {
-    for (int col = 0; col < 8; col++) {
-      final piece = board[row][col];
-      // if the piece is not null and its color is black
-      if (piece != null && !piece.isWhite) {
-        final moves = calculateRealValidMoves(row, col, piece, true);
-        for (var move in moves) {
-          allMoves.add({
-            'fromRow': row,
-            'fromColumn': col,
-            'toRow': move[0],
-            'toColumn': move[1],
-          });
-        }
-      }
+// recording the game result in Firestore
+Future<void> _recordGameResult(bool whiteWon) async {
+  final userScore = Provider.of<UserScore>(context, listen: false);
+  if (currentGameId == null) return;
+  try {
+    // Updating the game status
+    await _firestore.collection('games').doc(currentGameId).update({
+      'winner': whiteWon ? _currentUser?.uid : 'opponent',
+      'status': 'completed',
+      'endTime': FieldValue.serverTimestamp(),
+    });
+    // update the local user score
+    bool isWhite = _currentUser?.uid ==FirebaseAuth.instance.currentUser?.uid;
+    bool userWon = (whiteWon && isWhite) || (!whiteWon && !isWhite);
+    bool userLost = !userWon;
+    
+    if (_currentUser != null) {
+      final userRef = _firestore.collection('users').doc(_currentUser!.uid);
+        await userRef.update({
+        'gamesPlayed': FieldValue.increment(1),
+        'gamesWon': FieldValue.increment(whiteWon ? 1 : 0),
+        'gamesLost': FieldValue.increment(userLost ? 1 : 0),
+        'rating': FieldValue.increment(userWon ? 15 : -15),
+        'gameRefs': FieldValue.arrayUnion([currentGameId!]),
+      });
+      userScore.recordResult(isWin: userWon, isDraw: false);
     }
-  }
-  if (allMoves.isNotEmpty) {
-    final selectedMove = allMoves[Random().nextInt(allMoves.length)];
-    selectedPiece = board[selectedMove['fromRow']][selectedMove['fromColumn']];
-    selectedRow = selectedMove['fromRow'];
-    selectedColumn = selectedMove['fromColumn'];
-    movePiece(selectedMove['toRow'], selectedMove['toColumn']);
+    print('Game result recorded successfully');
+  } catch (e) {
+    debugPrint('Error recording game result: $e');
   }
 }
-
 
 // notation for the move
 String _getMoveNotation(int newRow, int newColumn){
@@ -658,6 +676,7 @@ bool isCheckmate(bool isWhiteKing){
 
 // resetting the game
 void resetGame() {
+  Navigator.pop(context);
   
   setState(() {
     _initializeBoard();
@@ -677,7 +696,6 @@ void resetGame() {
     validMoves = [];
   });
 }
-
 // confirmation dialog for home button
 void homeConfirmation(){
   showDialog(
@@ -706,51 +724,22 @@ void homeConfirmation(){
   );
 }
 
-
-// confirmation dialog for reset button
-void resetConfirmation(){
-  showDialog(
-    context: context, 
-    builder: (context) => AlertDialog(
-      backgroundColor: const Color.fromARGB(255, 35, 44, 49),
-      title: const Text('Are you sure you want to reset the game?', style: TextStyle(color: Colors.white, fontSize: 20),),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Cancel', style: TextStyle(color: Color.fromARGB(255, 72, 161, 58), fontWeight: FontWeight.bold, fontSize: 16)),
-        ),
-        TextButton(
-          onPressed: (){
-            Navigator.pop(context);
-            resetGame();
-          },
-          child: const Text('Yes', style: TextStyle(color: Color.fromARGB(255, 72, 161, 58), fontWeight: FontWeight.bold, fontSize: 16)),
-        ),
-      ],
-    ),
-  );
-}
-
-
-
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
       backgroundColor:  const Color.fromARGB(255, 52, 52, 52),
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Playing With Computer', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
+        title: const Text('Online Mode', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
         backgroundColor: const Color.fromARGB(255, 31, 28, 28),
       ),
       body: Stack(
         children: [
-           Column(
+          Column(
           children: [
+            // white pieces that has been captured
             const SizedBox(height: 20),
             // game turn
-             // Computer
             Padding(
               padding: const EdgeInsets.only(left: 10),
               child: Column(
@@ -763,7 +752,7 @@ void resetConfirmation(){
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           image: const DecorationImage(
-                            image: AssetImage('lib/images/computer.jpeg'),
+                            image: AssetImage('lib/images/online.jpeg'),
                             fit: BoxFit.cover,
                           ),
                           boxShadow: !isWhiteTurn
@@ -779,7 +768,7 @@ void resetConfirmation(){
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        'Computer',
+                        'Black Player',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -806,6 +795,22 @@ void resetConfirmation(){
               ),
             ),
             SizedBox(height: 60),
+            // check status
+            checkStatus 
+            ? Container(
+              padding: const EdgeInsets.all(8.0),
+              color: Colors.red,
+              child: const Text(
+                'Check!',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            )
+            : SizedBox.shrink(),
+            // chess board
             Expanded(
               flex: 4,
               child: GridView.builder(
@@ -838,9 +843,7 @@ void resetConfirmation(){
                       piece: board[y][x],
                       isSelected: isSelected,
                       isValidMove: isValidMove,
-                      onTap: () {
-                        if (isWhiteTurn) _selectedPiece(y, x);
-                      },
+                      onTap: () => _selectedPiece(y, x),
                       isInCheck: kingUnderCheck,
                     );
                   },
@@ -848,47 +851,44 @@ void resetConfirmation(){
                 ),
             ),
             // white player
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Column(
                     children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          image: const DecorationImage(
-                            image: AssetImage('lib/images/cat.jpeg'),
-                            fit: BoxFit.cover,
+                      Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              image: const DecorationImage(
+                                image: AssetImage('lib/images/cat.jpeg'),
+                                fit: BoxFit.cover,
+                              ),
+                              boxShadow: isWhiteTurn
+                                  ? [
+                                      const BoxShadow(
+                                        color: Colors.lightGreenAccent,
+                                        spreadRadius: 2,
+                                        blurRadius: 0,
+                                      ),
+                                    ]
+                                  : null,
+                            ), 
                           ),
-                          boxShadow: isWhiteTurn
-                              ? [
-                                  const BoxShadow(
-                                    color: Colors.lightGreenAccent,
-                                    spreadRadius: 2,
-                                    blurRadius: 0,
-                                  ),
-                                ]
-                              : null,
-                        ), 
+                          const SizedBox(width: 16),
+                          Text(
+                            'White Player',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isWhiteTurn ? Colors.green : Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      Text(
-                        whitePlayerEmail,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: isWhiteTurn ? Colors.green : Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  // deadpieces
-                  SizedBox(
+                      SizedBox(
                     height: 30,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
@@ -902,19 +902,19 @@ void resetConfirmation(){
                       }
                     ),
                   ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 60),
-             // footer
+                    ],
+                  ),
+                ),
+          
+              const SizedBox(height: 60),
+            // footer
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               decoration: BoxDecoration(
                 color: const Color.fromARGB(255, 31, 28, 28),
                 boxShadow: [
                   BoxShadow(
-                    color: Color.fromRGBO(0, 0, 0, 0.2),
+                    color: Color.fromRGBO(36, 34, 34, 0.2),
                     spreadRadius: 2,
                     blurRadius: 5,
                   ),
@@ -926,14 +926,10 @@ void resetConfirmation(){
                   // Home
                   GestureDetector(
                     onTap: homeConfirmation,
-                    child: Icon(Icons.home, color: const Color.fromARGB(255, 255, 255, 255), size: 34,),
+                    child: Icon(Icons.home, color: const Color.fromARGB(255, 255, 255, 255), size: 40,),
                       
                   ),
-                  // Reset
-                  GestureDetector(
-                    onTap: resetConfirmation,
-                    child: Icon(Icons.refresh, color: const Color.fromARGB(255, 255, 255, 255), size: 34, ),
-                  ),
+            
                   // Profile
                   GestureDetector(
                     onTap: (){
@@ -948,13 +944,9 @@ void resetConfirmation(){
                 ],
               ),
             )
-
-            // Turn indicator
-           
-            
           ],
         ),
-      ]
+        ]
       ),
     );
   }

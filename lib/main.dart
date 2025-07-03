@@ -1,8 +1,8 @@
 import 'package:chess_app/auth/main_page.dart';
 import 'package:chess_app/helper/offline_game_record.dart';
 import 'package:chess_app/helper/user_score.dart';
-import 'package:chess_app/sign_in.dart';
-import 'package:chess_app/sign_up.dart';
+import 'package:chess_app/auth/sign_in.dart';
+import 'package:chess_app/auth/sign_up.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';

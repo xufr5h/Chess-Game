@@ -1,27 +1,28 @@
 import 'package:chess_app/components/dead_pieces.dart';
+import 'package:chess_app/components/input_name.dart';
 import 'package:chess_app/components/pieces.dart';
 import 'package:chess_app/components/square.dart';
-import 'package:chess_app/game_mode.dart';
-import 'package:chess_app/helper/helper_method.dart';
-import 'package:chess_app/profile.dart';
+import 'package:chess_app/modes/game_mode.dart';
+import 'package:chess_app/helper/offline_game_record.dart';
+import 'package:chess_app/profile/game_stats.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:chess_app/helper/helper_method.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
-import 'helper/user_score.dart';
+import 'package:hive/hive.dart';
+import 'package:chess_app/profile/profile.dart';
 
 
-
-class ChessBoard extends StatefulWidget {
-  const ChessBoard({super.key});
+class PlayWithFriend extends StatefulWidget {
+  final String blackPlayerName;
+  final String whitePlayerEmail;
+  const PlayWithFriend({super.key, required this.blackPlayerName, required this.whitePlayerEmail});
 
   @override
-  State<ChessBoard> createState() => _ChessBoardState();
+  State<PlayWithFriend> createState() => _PlayWithFriendState();
 }
 
-class _ChessBoardState extends State<ChessBoard> {
-
-// creating a 2D chess list representing the chess board
+class _PlayWithFriendState extends State<PlayWithFriend> {
+  // creating a 2D chess list representing the chess board
  late List<List<chessPiece?>> board;
 
 //  selected piece on the board
@@ -39,44 +40,33 @@ List<chessPiece> blackCapturedPieces = [];
 // list of white pieces that has been captured
 List<chessPiece> whiteCapturedPieces = []; 
 
+// List of the moves
+List<String> moveHistory = [];
+
 // indicating the turns 
 bool isWhiteTurn = true;
 
 // gameId
 String? currentGameId;
 
-// Firestore instance
-final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-final User? _currentUser = FirebaseAuth.instance.currentUser;
-
 // keepoing track of the kings position
 List<int> whiteKingPosition = [7, 4];
 List<int> blackKingPosition = [0, 4];
 bool checkStatus = false; 
 
+// Defaul black fallback
+String blackPlayerName = 'Black';
+String whitePlayerEmail = ' ';
+
 @override
 void initState() {
   super.initState();
   _initializeBoard();
-  _createNewGame();
+
+  blackPlayerName = widget.blackPlayerName;
+  whitePlayerEmail = widget.whitePlayerEmail;
 }
 
-// creating a new game in Firestore
-void _createNewGame() async {
-  try {
-    final docRef = await _firestore.collection('games').add({
-      'playerwhite': _currentUser?.uid,
-      'playerblack': null,
-      'moves': [],
-      'status': 'ongoing',
-      'createdAt': FieldValue.serverTimestamp(),
-      'timeControl': '5+0'
-    });
-    currentGameId = docRef.id;
-  } catch (e) {
-    debugPrint('Error creating new game: $e');
-  }
-}
 
 // Initializing the board
 void _initializeBoard() {
@@ -441,9 +431,6 @@ List<List<int>>calculateRealValidMoves (int row, int column, chessPiece ? piece,
 
 // moving the piece to the selected square
 void movePiece(int newRow, int newColumn) async {
-  // Make a copy of the current piece and clear the original position
-  chessPiece? movingPiece = selectedPiece;
-  
   setState(() {
     // Capture logic
     if (board[newRow][newColumn] != null) {
@@ -456,39 +443,54 @@ void movePiece(int newRow, int newColumn) async {
     }
 
     // Move the piece
-    board[newRow][newColumn] = movingPiece;
+    board[newRow][newColumn] = selectedPiece;
     board[selectedRow][selectedColumn] = null;
 
+    // move notation
+    String notation = _getMoveNotation(newRow, newColumn);
+    moveHistory.add(notation);
+
     // Update king position if needed
-    if (movingPiece!.type == chessPieceType.king) {
-      if (movingPiece.isWhite) {
+    if (selectedPiece!.type == chessPieceType.king) {
+      if (selectedPiece!.isWhite) {
         whiteKingPosition = [newRow, newColumn];
       } else {
         blackKingPosition = [newRow, newColumn];
       }
     }
+    final bool currentPlayerIsWhite = isWhiteTurn;
+
+    
 
     // Check for check
-    checkStatus = isKingInCheck(!isWhiteTurn);
-    if (isCheckmate(!isWhiteTurn)) {
+    checkStatus = isKingInCheck(!currentPlayerIsWhite);
+    if (isCheckmate(!currentPlayerIsWhite)) {
+      // storing the game locally
+    _storeGameLocally(
+      player1: whitePlayerEmail, 
+      player2: blackPlayerName, 
+      result: currentPlayerIsWhite ? '$whitePlayerEmail wins' : '$blackPlayerName wins', 
+      playedAt: DateTime.now(),
+    );
       Future.delayed(Duration.zero, () {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('CHECKMATE!'),
-            content: Text('${isWhiteTurn ? "White" : "Black"} wins!'),
+            content: Text('${currentPlayerIsWhite ? whitePlayerEmail : blackPlayerName} wins!'),
             actions: [
               TextButton(
-                onPressed: resetGame,
+                onPressed: (){
+                  Navigator.of(context).pop();
+                  resetGame();
+                },
                 child: const Text('Play Again'),
               ),
             ],
+            
           ),
         );
       });
-
-      _recordGameResult(isWhiteTurn);
-      return;
     }
     isWhiteTurn = !isWhiteTurn;
     // Reset selection
@@ -497,47 +499,23 @@ void movePiece(int newRow, int newColumn) async {
     selectedColumn = -1;
     validMoves = [];
   });
-
-  // Rest of your Firestore and checkmate logic...
-  if (currentGameId != null) {
-    await _firestore.collection('games').doc(currentGameId).update({
-      'moves': FieldValue.arrayUnion([_getMoveNotation(newRow, newColumn)]),
-      'lastMoveAt': FieldValue.serverTimestamp(),
-    });
-  }
 }
 
-// recording the game result in Firestore
-Future<void> _recordGameResult(bool whiteWon) async {
-  final userScore = Provider.of<UserScore>(context, listen: false);
-  if (currentGameId == null) return;
-  try {
-    // Updating the game status
-    await _firestore.collection('games').doc(currentGameId).update({
-      'winner': whiteWon ? _currentUser?.uid : 'opponent',
-      'status': 'completed',
-      'endTime': FieldValue.serverTimestamp(),
-    });
-    // update the local user score
-    bool isWhite = _currentUser?.uid ==FirebaseAuth.instance.currentUser?.uid;
-    bool userWon = (whiteWon && isWhite) || (!whiteWon && !isWhite);
-    bool userLost = !userWon;
-    
-    if (_currentUser != null) {
-      final userRef = _firestore.collection('users').doc(_currentUser!.uid);
-        await userRef.update({
-        'gamesPlayed': FieldValue.increment(1),
-        'gamesWon': FieldValue.increment(whiteWon ? 1 : 0),
-        'gamesLost': FieldValue.increment(userLost ? 1 : 0),
-        'rating': FieldValue.increment(userWon ? 15 : -15),
-        'gameRefs': FieldValue.arrayUnion([currentGameId!]),
-      });
-      userScore.recordResult(isWin: userWon, isDraw: false);
-    }
-    print('Game result recorded successfully');
-  } catch (e) {
-    debugPrint('Error recording game result: $e');
-  }
+// storing the game locally in Hive
+Future<void> _storeGameLocally({
+  required String player1,
+  required String player2,
+  required String result,
+  required DateTime playedAt,
+}) async {
+  final box = Hive.box<OfflineGameRecord>('humanGameRecords');
+  final game = OfflineGameRecord(
+    player1: player1, 
+    player2: player2, 
+    result: result, 
+    playedAt: DateTime.now(),);
+    await box.add(game);
+    debugPrint("Game saved Locally");
 }
 
 // notation for the move
@@ -675,7 +653,6 @@ bool isCheckmate(bool isWhiteKing){
 
 // resetting the game
 void resetGame() {
-  Navigator.pop(context);
   
   setState(() {
     _initializeBoard();
@@ -695,7 +672,7 @@ void resetGame() {
     validMoves = [];
   });
 }
-// confirmation dialog for home button
+
 void homeConfirmation(){
   showDialog(
     context: context, 
@@ -723,22 +700,48 @@ void homeConfirmation(){
   );
 }
 
+
+// confirmation dialog for reset button
+void resetConfirmation(){
+  showDialog(
+    context: context, 
+    builder: (context) => AlertDialog(
+      backgroundColor: const Color.fromARGB(255, 35, 44, 49),
+      title: const Text('Are you sure you want to reset the game?', style: TextStyle(color: Colors.white, fontSize: 20),),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Cancel', style: TextStyle(color: Color.fromARGB(255, 72, 161, 58), fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+        TextButton(
+          onPressed: (){
+            Navigator.pop(context);
+            resetGame();
+          },
+          child: const Text('Yes', style: TextStyle(color: Color.fromARGB(255, 72, 161, 58), fontWeight: FontWeight.bold, fontSize: 16)),
+        ),
+      ],
+    ),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
       backgroundColor:  const Color.fromARGB(255, 52, 52, 52),
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Online Mode', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+        title: const Text('Friendly Match', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
         backgroundColor: const Color.fromARGB(255, 31, 28, 28),
       ),
       body: Stack(
         children: [
-          Column(
+           Column(
           children: [
-            // white pieces that has been captured
             const SizedBox(height: 20),
-            // game turn
+             // black player turn indicator
             Padding(
               padding: const EdgeInsets.only(left: 10),
               child: Column(
@@ -751,7 +754,7 @@ void homeConfirmation(){
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           image: const DecorationImage(
-                            image: AssetImage('lib/images/online.jpeg'),
+                            image: AssetImage('lib/images/blackPlayer.jpeg'),
                             fit: BoxFit.cover,
                           ),
                           boxShadow: !isWhiteTurn
@@ -767,11 +770,11 @@ void homeConfirmation(){
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        'Black Player',
+                        blackPlayerName,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: !isWhiteTurn ? Colors.green : Colors.white,
+                          color: !isWhiteTurn ? Colors.green : const Color.fromARGB(255, 250, 250, 250),
                         ),
                       ),
                     ],
@@ -793,22 +796,7 @@ void homeConfirmation(){
                 ],
               ),
             ),
-            SizedBox(height: 60),
-            // check status
-            checkStatus 
-            ? Container(
-              padding: const EdgeInsets.all(8.0),
-              color: Colors.red,
-              child: const Text(
-                'Check!',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            )
-            : SizedBox.shrink(),
+            const SizedBox(height: 60),
             // chess board
             Expanded(
               flex: 4,
@@ -849,45 +837,46 @@ void homeConfirmation(){
                   itemCount: 8*8,
                 ),
             ),
+            
             // white player
-                Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              image: const DecorationImage(
-                                image: AssetImage('lib/images/cat.jpeg'),
-                                fit: BoxFit.cover,
-                              ),
-                              boxShadow: isWhiteTurn
-                                  ? [
-                                      const BoxShadow(
-                                        color: Colors.lightGreenAccent,
-                                        spreadRadius: 2,
-                                        blurRadius: 0,
-                                      ),
-                                    ]
-                                  : null,
-                            ), 
-                          ),
-                          const SizedBox(width: 16),
-                          Text(
-                            'White Player',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: isWhiteTurn ? Colors.green : Colors.white,
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            image: const DecorationImage(
+                              image: AssetImage('lib/images/cat.jpeg'),
+                              fit: BoxFit.cover,
                             ),
+                            boxShadow: isWhiteTurn
+                                ? [
+                                    const BoxShadow(
+                                      color: Colors.lightGreenAccent,
+                                      spreadRadius: 2,
+                                      blurRadius: 0,
+                                    ),
+                                  ]
+                                : null,
+                          ), 
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          whitePlayerEmail,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isWhiteTurn ? Colors.green : const Color.fromARGB(255, 255, 255, 255),
                           ),
-                        ],
-                      ),
-                      SizedBox(
+                        ),
+                      ],
+                    ),
+                    SizedBox(
                     height: 30,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
@@ -901,11 +890,11 @@ void homeConfirmation(){
                       }
                     ),
                   ),
-                    ],
-                  ),
+                  ],
                 ),
-          
-              const SizedBox(height: 60),
+              ),
+        
+            const SizedBox(height: 60),
             // footer
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
@@ -913,7 +902,7 @@ void homeConfirmation(){
                 color: const Color.fromARGB(255, 31, 28, 28),
                 boxShadow: [
                   BoxShadow(
-                    color: Color.fromRGBO(36, 34, 34, 0.2),
+                    color: Color.fromRGBO(0, 0, 0, 0.2),
                     spreadRadius: 2,
                     blurRadius: 5,
                   ),
@@ -925,10 +914,14 @@ void homeConfirmation(){
                   // Home
                   GestureDetector(
                     onTap: homeConfirmation,
-                    child: Icon(Icons.home, color: const Color.fromARGB(255, 255, 255, 255), size: 40,),
+                    child: Icon(Icons.home, color: const Color.fromARGB(255, 255, 255, 255), size: 34,),
                       
                   ),
-            
+                  // Reset
+                  GestureDetector(
+                    onTap: resetConfirmation,
+                    child: Icon(Icons.refresh, color: const Color.fromARGB(255, 255, 255, 255), size: 34, ),
+                  ),
                   // Profile
                   GestureDetector(
                     onTap: (){
@@ -945,7 +938,7 @@ void homeConfirmation(){
             )
           ],
         ),
-        ]
+      ]
       ),
     );
   }

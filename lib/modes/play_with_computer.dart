@@ -1,27 +1,29 @@
+import 'dart:math';
+
 import 'package:chess_app/components/dead_pieces.dart';
 import 'package:chess_app/components/input_name.dart';
 import 'package:chess_app/components/pieces.dart';
 import 'package:chess_app/components/square.dart';
-import 'package:chess_app/game_mode.dart';
+import 'package:chess_app/modes/game_mode.dart';
 import 'package:chess_app/helper/offline_game_record.dart';
-import 'package:chess_app/profile.dart';
+import 'package:chess_app/profile/game_stats.dart';
 import 'package:flutter/material.dart';
 import 'package:chess_app/helper/helper_method.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive/hive.dart';
+import 'package:chess_app/profile/profile.dart';
 
-
-class PlayWithFriend extends StatefulWidget {
-  final String blackPlayerName;
+class PlayWithComputer extends StatefulWidget {
   final String whitePlayerEmail;
-  const PlayWithFriend({super.key, required this.blackPlayerName, required this.whitePlayerEmail});
+  final String blackPlayerName;
+  const PlayWithComputer({super.key, required this.whitePlayerEmail, required this.blackPlayerName});
 
   @override
-  State<PlayWithFriend> createState() => _PlayWithFriendState();
+  State<PlayWithComputer> createState() => _PlayWithComputerState();
 }
 
-class _PlayWithFriendState extends State<PlayWithFriend> {
-  // creating a 2D chess list representing the chess board
+class _PlayWithComputerState extends State<PlayWithComputer> {
+    // creating a 2D chess list representing the chess board
  late List<List<chessPiece?>> board;
 
 //  selected piece on the board
@@ -54,16 +56,17 @@ List<int> blackKingPosition = [0, 4];
 bool checkStatus = false; 
 
 // Defaul black fallback
-String blackPlayerName = 'Black';
+String blackPlayerName = 'Computer';
 String whitePlayerEmail = ' ';
 
 @override
 void initState() {
   super.initState();
   _initializeBoard();
-
+  
   blackPlayerName = widget.blackPlayerName;
   whitePlayerEmail = widget.whitePlayerEmail;
+
 }
 
 
@@ -459,18 +462,9 @@ void movePiece(int newRow, int newColumn) async {
     }
     final bool currentPlayerIsWhite = isWhiteTurn;
 
-    
-
     // Check for check
     checkStatus = isKingInCheck(!currentPlayerIsWhite);
     if (isCheckmate(!currentPlayerIsWhite)) {
-      // storing the game locally
-    _storeGameLocally(
-      player1: whitePlayerEmail, 
-      player2: blackPlayerName, 
-      result: currentPlayerIsWhite ? '$whitePlayerEmail wins' : '$blackPlayerName wins', 
-      playedAt: DateTime.now(),
-    );
       Future.delayed(Duration.zero, () {
         showDialog(
           context: context,
@@ -479,19 +473,18 @@ void movePiece(int newRow, int newColumn) async {
             content: Text('${currentPlayerIsWhite ? whitePlayerEmail : blackPlayerName} wins!'),
             actions: [
               TextButton(
-                onPressed: (){
-                  Navigator.of(context).pop();
-                  resetGame();
-                },
+                onPressed: resetGame,
                 child: const Text('Play Again'),
               ),
             ],
-            
           ),
         );
       });
     }
     isWhiteTurn = !isWhiteTurn;
+    if (!isWhiteTurn) {
+      Future.delayed(const Duration(seconds: 1), _makeComputerMove);
+    }
     // Reset selection
     selectedPiece = null;
     selectedRow = -1;
@@ -500,22 +493,36 @@ void movePiece(int newRow, int newColumn) async {
   });
 }
 
-// storing the game locally in Hive
-Future<void> _storeGameLocally({
-  required String player1,
-  required String player2,
-  required String result,
-  required DateTime playedAt,
-}) async {
-  final box = Hive.box<OfflineGameRecord>('humanGameRecords');
-  final game = OfflineGameRecord(
-    player1: player1, 
-    player2: player2, 
-    result: result, 
-    playedAt: DateTime.now(),);
-    await box.add(game);
-    debugPrint("Game saved Locally");
+// making computer move 
+void _makeComputerMove(){
+  List<Map<String, dynamic>> allMoves = [];
+  // iterating through every square on the board
+  for (int row = 0; row < 8; row++) {
+    for (int col = 0; col < 8; col++) {
+      final piece = board[row][col];
+      // if the piece is not null and its color is black
+      if (piece != null && !piece.isWhite) {
+        final moves = calculateRealValidMoves(row, col, piece, true);
+        for (var move in moves) {
+          allMoves.add({
+            'fromRow': row,
+            'fromColumn': col,
+            'toRow': move[0],
+            'toColumn': move[1],
+          });
+        }
+      }
+    }
+  }
+  if (allMoves.isNotEmpty) {
+    final selectedMove = allMoves[Random().nextInt(allMoves.length)];
+    selectedPiece = board[selectedMove['fromRow']][selectedMove['fromColumn']];
+    selectedRow = selectedMove['fromRow'];
+    selectedColumn = selectedMove['fromColumn'];
+    movePiece(selectedMove['toRow'], selectedMove['toColumn']);
+  }
 }
+
 
 // notation for the move
 String _getMoveNotation(int newRow, int newColumn){
@@ -672,6 +679,7 @@ void resetGame() {
   });
 }
 
+// confirmation dialog for home button
 void homeConfirmation(){
   showDialog(
     context: context, 
@@ -726,13 +734,15 @@ void resetConfirmation(){
   );
 }
 
+
+
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
       backgroundColor:  const Color.fromARGB(255, 52, 52, 52),
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Friendly Match', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
+        title: const Text('Playing With Computer', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
         backgroundColor: const Color.fromARGB(255, 31, 28, 28),
       ),
       body: Stack(
@@ -740,7 +750,8 @@ void resetConfirmation(){
            Column(
           children: [
             const SizedBox(height: 20),
-             // black player turn indicator
+            // game turn
+             // Computer
             Padding(
               padding: const EdgeInsets.only(left: 10),
               child: Column(
@@ -753,7 +764,7 @@ void resetConfirmation(){
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           image: const DecorationImage(
-                            image: AssetImage('lib/images/blackPlayer.jpeg'),
+                            image: AssetImage('lib/images/computer.jpeg'),
                             fit: BoxFit.cover,
                           ),
                           boxShadow: !isWhiteTurn
@@ -769,11 +780,11 @@ void resetConfirmation(){
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        blackPlayerName,
+                        'Computer',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: !isWhiteTurn ? Colors.green : const Color.fromARGB(255, 250, 250, 250),
+                          color: !isWhiteTurn ? Colors.green : Colors.white,
                         ),
                       ),
                     ],
@@ -795,8 +806,7 @@ void resetConfirmation(){
                 ],
               ),
             ),
-            const SizedBox(height: 60),
-            // chess board
+            SizedBox(height: 60),
             Expanded(
               flex: 4,
               child: GridView.builder(
@@ -829,53 +839,57 @@ void resetConfirmation(){
                       piece: board[y][x],
                       isSelected: isSelected,
                       isValidMove: isValidMove,
-                      onTap: () => _selectedPiece(y, x),
+                      onTap: () {
+                        if (isWhiteTurn) _selectedPiece(y, x);
+                      },
                       isInCheck: kingUnderCheck,
                     );
                   },
                   itemCount: 8*8,
                 ),
             ),
-            
             // white player
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            image: const DecorationImage(
-                              image: AssetImage('lib/images/cat.jpeg'),
-                              fit: BoxFit.cover,
-                            ),
-                            boxShadow: isWhiteTurn
-                                ? [
-                                    const BoxShadow(
-                                      color: Colors.lightGreenAccent,
-                                      spreadRadius: 2,
-                                      blurRadius: 0,
-                                    ),
-                                  ]
-                                : null,
-                          ), 
-                        ),
-                        const SizedBox(width: 16),
-                        Text(
-                          whitePlayerEmail,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: isWhiteTurn ? Colors.green : const Color.fromARGB(255, 255, 255, 255),
+            Padding(
+              padding: const EdgeInsets.only(left: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          image: const DecorationImage(
+                            image: AssetImage('lib/images/cat.jpeg'),
+                            fit: BoxFit.cover,
                           ),
+                          boxShadow: isWhiteTurn
+                              ? [
+                                  const BoxShadow(
+                                    color: Colors.lightGreenAccent,
+                                    spreadRadius: 2,
+                                    blurRadius: 0,
+                                  ),
+                                ]
+                              : null,
+                        ), 
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        whitePlayerEmail,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isWhiteTurn ? Colors.green : Colors.white,
                         ),
-                      ],
-                    ),
-                    SizedBox(
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  // deadpieces
+                  SizedBox(
                     height: 30,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
@@ -889,12 +903,12 @@ void resetConfirmation(){
                       }
                     ),
                   ),
-                  ],
-                ),
+                ],
               ),
-        
-            const SizedBox(height: 60),
-            // footer
+            ),
+
+            SizedBox(height: 60),
+             // footer
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               decoration: BoxDecoration(
@@ -935,6 +949,10 @@ void resetConfirmation(){
                 ],
               ),
             )
+
+            // Turn indicator
+           
+            
           ],
         ),
       ]

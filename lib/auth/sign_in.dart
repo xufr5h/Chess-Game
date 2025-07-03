@@ -1,14 +1,14 @@
-import 'package:chess_app/chess_board.dart';
+import 'package:chess_app/modes/chess_board.dart';
 import 'package:chess_app/components/textfield.dart';
-import 'package:chess_app/forgot_password.dart';
-import 'package:chess_app/game_mode.dart';
-import 'package:chess_app/sign_up.dart';
+import 'package:chess_app/auth/forgot_password.dart';
+import 'package:chess_app/modes/game_mode.dart';
+import 'package:chess_app/auth/sign_up.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'firebase_options.dart'; 
+import '../firebase_options.dart'; 
 
 
 class SignIn extends StatefulWidget {

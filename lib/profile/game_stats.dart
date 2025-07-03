@@ -1,18 +1,18 @@
-import 'package:chess_app/game_mode.dart';
-import 'package:chess_app/offline_game_history.dart';
+import 'package:chess_app/modes/game_mode.dart';
+import 'package:chess_app/profile/offline_game_history.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import 'helper/user_score.dart';
+import '../helper/user_score.dart';
 
-class MyProfile extends StatefulWidget {
-  const MyProfile({super.key});
+class MyStats extends StatefulWidget {
+  const MyStats({super.key});
 
   @override
-  State<MyProfile> createState() => _MyProfileState();
+  State<MyStats> createState() => _MyStatsState();
 }
 
-class _MyProfileState extends State<MyProfile> {
+class _MyStatsState extends State<MyStats> {
   // autheticating the user
   User? user;
   bool isLoading = true;

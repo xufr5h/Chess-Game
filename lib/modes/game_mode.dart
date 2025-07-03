@@ -1,10 +1,11 @@
-import 'package:chess_app/chess_board.dart';
+import 'package:chess_app/modes/chess_board.dart';
 import 'package:chess_app/components/input_name.dart';
-import 'package:chess_app/play_with_computer.dart';
-import 'package:chess_app/play_with_friend.dart';
-import 'package:chess_app/profile.dart';
+import 'package:chess_app/modes/play_with_computer.dart';
+import 'package:chess_app/modes/play_with_friend.dart';
+import 'package:chess_app/profile/game_stats.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:chess_app/profile/profile.dart';
 
 class GameMode extends StatefulWidget {
   const GameMode({super.key});

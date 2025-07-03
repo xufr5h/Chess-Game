@@ -1,5 +1,5 @@
-import 'package:chess_app/sign_in.dart';
-import 'package:chess_app/sign_up.dart';
+import 'package:chess_app/auth/sign_in.dart';
+import 'package:chess_app/auth/sign_up.dart';
 import 'package:flutter/material.dart';
 
 class AuthPage extends StatefulWidget {

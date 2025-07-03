@@ -1,7 +1,7 @@
-import 'package:chess_app/chess_board.dart';
+import 'package:chess_app/modes/chess_board.dart';
 import 'package:chess_app/components/textfield.dart';
-import 'package:chess_app/game_mode.dart';
-import 'package:chess_app/sign_in.dart';
+import 'package:chess_app/modes/game_mode.dart';
+import 'package:chess_app/auth/sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
