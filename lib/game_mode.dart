@@ -17,14 +17,14 @@ class _GameModeState extends State<GameMode> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+      backgroundColor: const Color.fromARGB(255, 52, 52, 52),
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
           'Game Mode',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+        backgroundColor: const Color.fromARGB(255, 31, 28, 28),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -43,7 +43,7 @@ class _GameModeState extends State<GameMode> {
                       elevation: 4,
                       margin: const EdgeInsets.symmetric(
                           horizontal: 30, vertical: 20),
-                      color: const Color.fromARGB(255, 81, 39, 25),
+                      color: const Color.fromARGB(255,192, 192, 192),
                       child: InkWell(
                         onTap: () {
                           final user = FirebaseAuth.instance.currentUser;
@@ -65,13 +65,13 @@ class _GameModeState extends State<GameMode> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
                               Icon(Icons.computer,
-                                  size: 50, color: Colors.white),
+                                  size: 50, color: Color.fromARGB(255, 46, 151, 29)),
                               SizedBox(height: 10),
                               Text(
                                 'Play with Computer',
                                 style: TextStyle(
                                     fontSize: 20,
-                                    color: Colors.white,
+                                    color: Color.fromARGB(255, 0, 0, 0),
                                     fontWeight: FontWeight.bold),
                               ),
                             ],
@@ -88,7 +88,7 @@ class _GameModeState extends State<GameMode> {
                       elevation: 4,
                       margin: const EdgeInsets.symmetric(
                           horizontal: 30, vertical: 20),
-                      color: const Color.fromARGB(255, 81, 39, 25),
+                      color: const Color.fromARGB(255,192, 192, 192),
                       child: InkWell(
                         onTap: () {
                           showDialog(
@@ -119,13 +119,13 @@ class _GameModeState extends State<GameMode> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: const [
                               Icon(Icons.person,
-                                  size: 50, color: Colors.white),
+                                  size: 50, color: Color.fromARGB(255, 46, 151, 29)),
                               SizedBox(height: 10),
                               Text(
                                 'Play with Friend',
                                 style: TextStyle(
                                     fontSize: 20,
-                                    color: Colors.white,
+                                    color: Color.fromARGB(255, 0, 0, 0),
                                     fontWeight: FontWeight.bold),
                               ),
                             ],
@@ -142,7 +142,7 @@ class _GameModeState extends State<GameMode> {
                       elevation: 4,
                       margin: const EdgeInsets.symmetric(
                           horizontal: 30, vertical: 20),
-                      color: const Color.fromARGB(255, 81, 39, 25),
+                      color: const Color.fromARGB(255,192, 192, 192),
                       child: InkWell(
                         onTap: () {
                           Navigator.push(
@@ -156,14 +156,14 @@ class _GameModeState extends State<GameMode> {
                               vertical: 20, horizontal: 16),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.wifi, size: 50, color: Colors.white),
+                            children: [
+                              Icon(Icons.wifi, size: 50, color:  Color.fromARGB(255, 46, 151, 29)),
                               SizedBox(height: 10),
                               Text(
                                 'Online Mode',
                                 style: TextStyle(
                                     fontSize: 20,
-                                    color: Colors.white,
+                                    color: Color.fromARGB(255, 0, 0, 0),
                                     fontWeight: FontWeight.bold),
                               ),
                             ],
@@ -180,7 +180,7 @@ class _GameModeState extends State<GameMode> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
             decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 81, 39, 25),
+              color: const Color.fromARGB(255, 31, 28, 28),
               boxShadow: [
                 BoxShadow(
                   color: const Color.fromRGBO(0, 0, 0, 0.2),
@@ -195,13 +195,9 @@ class _GameModeState extends State<GameMode> {
                 // Home
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const GameMode()),
-                    );
                   },
                   child: const Icon(Icons.home,
-                      color: Colors.black, size: 40),
+                      color: Colors.white, size: 40),
                 ),
                 // Profile
                 GestureDetector(

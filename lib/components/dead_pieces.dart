@@ -9,14 +9,19 @@ class DeadPieces extends StatelessWidget {
     super.key,
     required this.imagePath,
     required this.isWhite,
-    this.size = 10.0,
+    this.size = 24.0,
 });
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(
-      imagePath,
-      color: isWhite ? Colors.grey[400] : Colors.grey[800],
-      );
+    return Container(
+      width: size,
+      height: size,
+      child: Image.asset(
+        imagePath,
+        color: isWhite ? Colors.white : Colors.black,
+        fit: BoxFit.cover,
+      ),
+    );
   }
 }

@@ -26,10 +26,10 @@ class Square extends StatelessWidget {
     Color? borderColor;
     double borderWidth = 1;
     if (isSelected) {
-      squareColor = Colors.green.withAlpha(150);
+      squareColor = const Color.fromARGB(255, 175, 235, 11).withAlpha(150);
     } 
     else {
-      squareColor = isWhite ? const Color.fromARGB(255, 161, 151, 151) : const Color.fromARGB(255, 89, 38, 20);
+      squareColor = isWhite ? const Color.fromARGB(255, 245, 245, 220).withAlpha(180) : const Color.fromARGB(255, 72, 161, 58).withAlpha(150);
     }
 
     // add red border if the king is in check

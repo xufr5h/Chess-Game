@@ -72,7 +72,7 @@ class _MyProfileState extends State<MyProfile> {
           label,
           style: const TextStyle(
             fontSize: 14,
-            color: Color.fromARGB(255, 255, 255, 255),
+            color: Color.fromARGB(255, 0, 0, 0),
           ),
         ),
         Text(
@@ -80,7 +80,7 @@ class _MyProfileState extends State<MyProfile> {
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 255, 255, 255),
+            color: Color.fromARGB(255, 0, 0, 0),
           ),
         )
       ],
@@ -140,9 +140,9 @@ class _MyProfileState extends State<MyProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+      backgroundColor: const Color.fromARGB(255, 52, 52, 52),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+        backgroundColor: const Color.fromARGB(255, 31, 28, 28),
         centerTitle: true,
         title: const Text(
           'My Profile',
@@ -180,7 +180,7 @@ class _MyProfileState extends State<MyProfile> {
             ),
             // statistics card
             Card(
-              color: const Color.fromARGB(255, 81, 39, 25),
+              color: const Color.fromARGB(255,192, 192, 192),
               margin: const EdgeInsets.all(16),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -191,7 +191,7 @@ class _MyProfileState extends State<MyProfile> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color:  Color.fromARGB(255, 255, 255, 255)
+                        color:  Color.fromARGB(255, 7, 95, 13)
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -212,7 +212,7 @@ class _MyProfileState extends State<MyProfile> {
                       'Win Rate: ${context.watch<UserScore>().winRate.toStringAsFixed(1)}%',
                       style: const TextStyle(
                         fontSize: 16,
-                        color: Color.fromARGB(255, 255, 255, 255),
+                        color: Color.fromARGB(255, 0, 0, 0),
                       ),
                     )
                   ],

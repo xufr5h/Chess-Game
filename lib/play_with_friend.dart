@@ -676,14 +676,14 @@ void homeConfirmation(){
   showDialog(
     context: context, 
     builder: (context) => AlertDialog(
-      backgroundColor: const Color.fromARGB(255, 81, 39, 25),
+      backgroundColor: const Color.fromARGB(255, 35, 44, 49),
       title: const Text('Are you sure you want to go back to the home page?', style: TextStyle(color: Colors.white, fontSize: 20),),
       actions: [
         TextButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          child: const Text('Cancel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+          child:  Text('Cancel', style: TextStyle(color: Color.fromARGB(255, 72, 161, 58), fontWeight: FontWeight.bold, fontSize: 16)),
         ),
         TextButton(
           onPressed: () {
@@ -692,33 +692,34 @@ void homeConfirmation(){
               MaterialPageRoute(builder: (context) => const GameMode()),
             );
           },
-          child: const Text('Yes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+          child: Text('Yes', style: TextStyle(color: Color.fromARGB(255, 72, 161, 58), fontWeight: FontWeight.bold, fontSize: 16)),
         ),
       ],
     ),
   );
 }
 
+
 // confirmation dialog for reset button
 void resetConfirmation(){
   showDialog(
     context: context, 
     builder: (context) => AlertDialog(
-      backgroundColor: const Color.fromARGB(255, 81, 39, 25),
+      backgroundColor: const Color.fromARGB(255, 35, 44, 49),
       title: const Text('Are you sure you want to reset the game?', style: TextStyle(color: Colors.white, fontSize: 20),),
       actions: [
         TextButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          child: const Text('Cancel', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+          child: const Text('Cancel', style: TextStyle(color: Color.fromARGB(255, 72, 161, 58), fontWeight: FontWeight.bold, fontSize: 16)),
         ),
         TextButton(
           onPressed: (){
             Navigator.pop(context);
             resetGame();
           },
-          child: const Text('Yes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+          child: const Text('Yes', style: TextStyle(color: Color.fromARGB(255, 72, 161, 58), fontWeight: FontWeight.bold, fontSize: 16)),
         ),
       ],
     ),
@@ -728,11 +729,11 @@ void resetConfirmation(){
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      backgroundColor:  const Color.fromARGB(255, 111, 78, 55),
+      backgroundColor:  const Color.fromARGB(255, 52, 52, 52),
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Friendly Match', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
-        backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+        backgroundColor: const Color.fromARGB(255, 31, 28, 28),
       ),
       body: Stack(
         children: [
@@ -742,35 +743,53 @@ void resetConfirmation(){
              // black player turn indicator
             Padding(
               padding: const EdgeInsets.only(left: 10),
-              child: Row(
+              child: Column(
                 children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      image: const DecorationImage(
-                        image: AssetImage('lib/images/blackPlayer.jpeg'),
-                        fit: BoxFit.cover,
+                  Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          image: const DecorationImage(
+                            image: AssetImage('lib/images/blackPlayer.jpeg'),
+                            fit: BoxFit.cover,
+                          ),
+                          boxShadow: !isWhiteTurn
+                              ? [
+                                  const BoxShadow(
+                                    color: Colors.lightGreenAccent,
+                                    spreadRadius: 2,
+                                    blurRadius: 0,
+                                  ),
+                                ]
+                              : null,
+                        ), 
                       ),
-                      boxShadow: !isWhiteTurn
-                          ? [
-                              const BoxShadow(
-                                color: Colors.lightGreenAccent,
-                                spreadRadius: 2,
-                                blurRadius: 0,
-                              ),
-                            ]
-                          : null,
-                    ), 
+                      const SizedBox(width: 16),
+                      Text(
+                        blackPlayerName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: !isWhiteTurn ? Colors.green : const Color.fromARGB(255, 250, 250, 250),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  Text(
-                    blackPlayerName,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: !isWhiteTurn ? Colors.white : Colors.black,
+                  SizedBox(
+                    height: 30,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: whiteCapturedPieces.length,
+                      itemBuilder: (context, index){
+                        chessPiece piece = whiteCapturedPieces[index];
+                        return DeadPieces(
+                          imagePath: piece.imagePath, 
+                          isWhite: piece.isWhite,
+                        );
+                      }
                     ),
                   ),
                 ],
@@ -821,47 +840,65 @@ void resetConfirmation(){
             // white player
               Padding(
                 padding: const EdgeInsets.only(left: 10),
-                child: Row(
+                child: Column(
                   children: [
-                    Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        image: const DecorationImage(
-                          image: AssetImage('lib/images/cat.jpeg'),
-                          fit: BoxFit.cover,
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            image: const DecorationImage(
+                              image: AssetImage('lib/images/cat.jpeg'),
+                              fit: BoxFit.cover,
+                            ),
+                            boxShadow: isWhiteTurn
+                                ? [
+                                    const BoxShadow(
+                                      color: Colors.lightGreenAccent,
+                                      spreadRadius: 2,
+                                      blurRadius: 0,
+                                    ),
+                                  ]
+                                : null,
+                          ), 
                         ),
-                        boxShadow: isWhiteTurn
-                            ? [
-                                const BoxShadow(
-                                  color: Colors.lightGreenAccent,
-                                  spreadRadius: 2,
-                                  blurRadius: 0,
-                                ),
-                              ]
-                            : null,
-                      ), 
+                        const SizedBox(width: 16),
+                        Text(
+                          whitePlayerEmail,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isWhiteTurn ? Colors.green : const Color.fromARGB(255, 255, 255, 255),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 16),
-                    Text(
-                      whitePlayerEmail,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isWhiteTurn ? Colors.white : Colors.black,
-                      ),
+                    SizedBox(
+                    height: 30,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: blackCapturedPieces.length,
+                      itemBuilder: (context, index){
+                        chessPiece piece = blackCapturedPieces[index];
+                        return DeadPieces(
+                          imagePath: piece.imagePath, 
+                          isWhite: piece.isWhite,
+                        );
+                      }
                     ),
+                  ),
                   ],
                 ),
               ),
         
-            const SizedBox(height: 80),
+            const SizedBox(height: 60),
             // footer
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 81, 39, 25),
+                color: const Color.fromARGB(255, 31, 28, 28),
                 boxShadow: [
                   BoxShadow(
                     color: Color.fromRGBO(0, 0, 0, 0.2),
@@ -876,13 +913,13 @@ void resetConfirmation(){
                   // Home
                   GestureDetector(
                     onTap: homeConfirmation,
-                    child: Icon(Icons.home, color: const Color.fromARGB(255, 0, 0, 0), size: 40,),
+                    child: Icon(Icons.home, color: const Color.fromARGB(255, 255, 255, 255), size: 34,),
                       
                   ),
                   // Reset
                   GestureDetector(
                     onTap: resetConfirmation,
-                    child: Icon(Icons.refresh, color: const Color.fromARGB(255, 0, 0, 0), size: 40, ),
+                    child: Icon(Icons.refresh, color: const Color.fromARGB(255, 255, 255, 255), size: 34, ),
                   ),
                   // Profile
                   GestureDetector(

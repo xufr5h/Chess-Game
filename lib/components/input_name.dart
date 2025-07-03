@@ -29,7 +29,7 @@ class _InputNameState extends State<InputName> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: const Color.fromARGB(255, 81, 39, 25),
+      backgroundColor: const Color.fromARGB(255, 35, 44, 49),
       content: SizedBox(
         width: 300,
         height: 150,
@@ -49,7 +49,7 @@ class _InputNameState extends State<InputName> {
           TextButton(onPressed: (){
             Navigator.of(context).pop();
           }, child: const Text('Cancel', style: TextStyle(
-            color: Colors.white, 
+            color: Color.fromARGB(255, 255, 255, 255), 
             fontWeight: FontWeight.bold,
             ),
             ),
@@ -57,7 +57,7 @@ class _InputNameState extends State<InputName> {
           ElevatedButton(
             onPressed: _submitName, 
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+              backgroundColor: const Color.fromARGB(255, 72, 161, 58),
               foregroundColor: const Color.fromARGB(255, 255, 255, 255),
             ),
             child: const Text('Submit'),
