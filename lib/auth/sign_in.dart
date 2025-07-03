@@ -104,7 +104,7 @@ class _SignInState extends State<SignIn> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+      backgroundColor: const Color.fromARGB(255, 31, 28, 28),
       body: SafeArea(
         child: SingleChildScrollView( 
           child: Container(
@@ -119,6 +119,7 @@ class _SignInState extends State<SignIn> {
                     'lib/images/logo.png',
                     height: 300,
                     width: 300,
+                    color: Colors.white,
                   ),
                 ),
                 // Sign In Text
@@ -126,7 +127,7 @@ class _SignInState extends State<SignIn> {
                   'Sign In',
                   style: TextStyle(
                     fontSize: 40,
-                    color: Colors.black,
+                    color: Color.fromARGB(255, 255, 255, 255),
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
@@ -162,7 +163,7 @@ class _SignInState extends State<SignIn> {
                           Navigator.push(context, MaterialPageRoute(builder: (context)=> const ForgotPassword()));
                         },
                         child: Text('Forgot Password?',
-                          style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 46, 54, 141), fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 16, color:  Color.fromARGB(255, 20, 102, 255), fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -175,7 +176,7 @@ class _SignInState extends State<SignIn> {
                 ElevatedButton(
                   onPressed: signInMethod,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: Colors.green,
                     padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)
@@ -190,7 +191,7 @@ class _SignInState extends State<SignIn> {
                 // Or Text
                 const Text(
                   'OR',
-                  style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 38, 35, 35), fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold),
                 ),
                 // Continue with Google Button
                 const SizedBox(height: 20),
@@ -199,7 +200,7 @@ class _SignInState extends State<SignIn> {
                     await signInWithGoogle();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                    backgroundColor: Colors.green,
                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)
@@ -218,13 +219,13 @@ class _SignInState extends State<SignIn> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text('Don\'t have an account? ',
-                      style: TextStyle(fontSize: 18, color: Colors.black),
+                      style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 255, 255, 255)),
                     ),
                     GestureDetector(
                       onTap: widget.showResigsterPage,
                       child: const Text(
                         'Sign Up',
-                        style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 8, 16, 100)),
+                        style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 20, 102, 255)),
                       ),
                     ),
                   ],

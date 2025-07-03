@@ -1,10 +1,9 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:chess_app/modes/chess_board.dart';
 import 'package:chess_app/components/input_name.dart';
 import 'package:chess_app/modes/play_with_computer.dart';
 import 'package:chess_app/modes/play_with_friend.dart';
-import 'package:chess_app/profile/game_stats.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:chess_app/profile/profile.dart';
 
 class GameMode extends StatefulWidget {
@@ -15,6 +14,8 @@ class GameMode extends StatefulWidget {
 }
 
 class _GameModeState extends State<GameMode> {
+  bool _isDrawerOpen = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,194 +28,176 @@ class _GameModeState extends State<GameMode> {
         ),
         backgroundColor: const Color.fromARGB(255, 31, 28, 28),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
         children: [
-          // Scrollable game cards
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  // Play with Computer
-                  SizedBox(
-                    width: 300,
-                    height: 200,
-                    child: Card(
-                      elevation: 4,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 30, vertical: 20),
-                      color: const Color.fromARGB(255,192, 192, 192),
-                      child: InkWell(
-                        onTap: () {
-                          final user = FirebaseAuth.instance.currentUser;
-                          String email = user?.email ?? 'White';
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PlayWithComputer(
-                                whitePlayerEmail: email,
-                                blackPlayerName: 'Computer',
-                              ),
+          // Main content area
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildGameModeCard(
+                      icon: Icons.computer,
+                      label: 'Play with Computer',
+                      onTap: () {
+                        final user = FirebaseAuth.instance.currentUser;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PlayWithComputer(
+                              whitePlayerEmail: user?.email ?? 'White',
+                              blackPlayerName: 'Computer',
                             ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 20, horizontal: 16),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.computer,
-                                  size: 50, color: Color.fromARGB(255, 46, 151, 29)),
-                              SizedBox(height: 10),
-                              Text(
-                                'Play with Computer',
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    color: Color.fromARGB(255, 0, 0, 0),
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  ),
-                  // Play with Friend
-                  SizedBox(
-                    width: 300,
-                    height: 200,
-                    child: Card(
-                      elevation: 4,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 30, vertical: 20),
-                      color: const Color.fromARGB(255,192, 192, 192),
-                      child: InkWell(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => InputName(
-                              onNameSubmitted: (playerName) {
-                                Navigator.of(context).pop();
-                                final user =
-                                    FirebaseAuth.instance.currentUser;
-                                String email = user?.email ?? 'White';
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PlayWithFriend(
-                                      blackPlayerName: playerName,
-                                      whitePlayerEmail: email,
-                                    ),
+                    const SizedBox(height: 30),
+                    _buildGameModeCard(
+                      icon: Icons.person,
+                      label: 'Play with Friend',
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => InputName(
+                            onNameSubmitted: (name) {
+                              Navigator.pop(context);
+                              final user = FirebaseAuth.instance.currentUser;
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PlayWithFriend(
+                                    blackPlayerName: name,
+                                    whitePlayerEmail: user?.email ?? 'White',
                                   ),
-                                );
-                              },
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 20, horizontal: 16),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.person,
-                                  size: 50, color: Color.fromARGB(255, 46, 151, 29)),
-                              SizedBox(height: 10),
-                              Text(
-                                'Play with Friend',
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    color: Color.fromARGB(255, 0, 0, 0),
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                                ),
+                              );
+                            },
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  ),
-                  // Online Mode
-                  SizedBox(
-                    width: 300,
-                    height: 200,
-                    child: Card(
-                      elevation: 4,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 30, vertical: 20),
-                      color: const Color.fromARGB(255,192, 192, 192),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const ChessBoard()),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 20, horizontal: 16),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.wifi, size: 50, color:  Color.fromARGB(255, 46, 151, 29)),
-                              SizedBox(height: 10),
-                              Text(
-                                'Online Mode',
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    color: Color.fromARGB(255, 0, 0, 0),
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                    const SizedBox(height: 30),
+                    _buildGameModeCard(
+                      icon: Icons.wifi,
+                      label: 'Online Mode',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ChessBoard(),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-          // Footer at the bottom
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 31, 28, 28),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color.fromRGBO(0, 0, 0, 0.2),
-                  spreadRadius: 2,
-                  blurRadius: 5,
+
+          // Overlay when drawer is open
+          if (_isDrawerOpen)
+            GestureDetector(
+              onTap: () => setState(() => _isDrawerOpen = false),
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                color: Colors.black54,
+              ),
+            ),
+
+          // Sliding drawer
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+            right: _isDrawerOpen ? 0 : -300,
+            top: 0,
+            bottom: 0,
+            width: 300,
+            child: Material(
+              elevation: 16,
+              color: const Color.fromARGB(255, 35, 44, 49),
+              child: CustomDrawer(
+                isDrawerOpen: _isDrawerOpen,
+                onCloseDrawer: () => setState(() => _isDrawerOpen = false),
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: _buildBottomNavBar(),
+    );
+  }
+
+  Widget _buildGameModeCard({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      width: 300,
+      height: 180,
+      child: Card(
+        elevation: 4,
+        color: const Color.fromARGB(255, 192, 192, 192),
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 50,
+                  color: const Color.fromARGB(255, 46, 151, 29),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               ],
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Home
-                GestureDetector(
-                  onTap: () {
-                  },
-                  child: const Icon(Icons.home,
-                      color: Colors.white, size: 40),
-                ),
-                // Profile
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const MyProfile()),
-                    );
-                  },
-                  child: const CircleAvatar(
-                    radius: 20,
-                    backgroundImage: AssetImage('lib/images/cat.jpeg'),
-                  ),
-                )
-              ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 31, 28, 28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.home, size: 32, color: Colors.white),
+            onPressed: () {},
+          ),
+          GestureDetector(
+            onTap: () => setState(() => _isDrawerOpen = !_isDrawerOpen),
+            child: const CircleAvatar(
+              radius: 20,
+              backgroundImage: AssetImage('lib/images/cat.jpeg'),
             ),
           ),
         ],

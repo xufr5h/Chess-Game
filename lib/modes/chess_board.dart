@@ -21,6 +21,7 @@ class ChessBoard extends StatefulWidget {
 }
 
 class _ChessBoardState extends State<ChessBoard> {
+  bool _isDrawerOpen = false; 
 
 // creating a 2D chess list representing the chess board
  late List<List<chessPiece?>> board;
@@ -742,74 +743,62 @@ void homeConfirmation(){
             // game turn
             Padding(
               padding: const EdgeInsets.only(left: 10),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          image: const DecorationImage(
-                            image: AssetImage('lib/images/online.jpeg'),
-                            fit: BoxFit.cover,
-                          ),
-                          boxShadow: !isWhiteTurn
-                              ? [
-                                  const BoxShadow(
-                                    color: Colors.lightGreenAccent,
-                                    spreadRadius: 2,
-                                    blurRadius: 0,
-                                  ),
-                                ]
-                              : null,
-                        ), 
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        'Black Player',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: !isWhiteTurn ? Colors.green : Colors.white,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            image: const DecorationImage(
+                              image: AssetImage('lib/images/online.jpeg'),
+                              fit: BoxFit.cover,
+                            ),
+                            boxShadow: !isWhiteTurn
+                                ? [
+                                    const BoxShadow(
+                                      color: Colors.lightGreenAccent,
+                                      spreadRadius: 2,
+                                      blurRadius: 0,
+                                    ),
+                                  ]
+                                : null,
+                          ), 
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 30,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: whiteCapturedPieces.length,
-                      itemBuilder: (context, index){
-                        chessPiece piece = whiteCapturedPieces[index];
-                        return DeadPieces(
-                          imagePath: piece.imagePath, 
-                          isWhite: piece.isWhite,
-                        );
-                      }
+                        const SizedBox(width: 16),
+                        Text(
+                          'Black Player',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: !isWhiteTurn ? Colors.green : Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    SizedBox(
+                      height: 30,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: whiteCapturedPieces.length,
+                        itemBuilder: (context, index){
+                          chessPiece piece = whiteCapturedPieces[index];
+                          return DeadPieces(
+                            imagePath: piece.imagePath, 
+                            isWhite: piece.isWhite,
+                          );
+                        }
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             SizedBox(height: 60),
-            // check status
-            checkStatus 
-            ? Container(
-              padding: const EdgeInsets.all(8.0),
-              color: Colors.red,
-              child: const Text(
-                'Check!',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            )
-            : SizedBox.shrink(),
+  
             // chess board
             Expanded(
               flex: 4,
@@ -852,7 +841,7 @@ void homeConfirmation(){
             ),
             // white player
                 Padding(
-                  padding: const EdgeInsets.only(left: 10),
+                  padding: const EdgeInsets.only(left: 10, bottom: 40),
                   child: Column(
                     children: [
                       Row(
@@ -906,15 +895,39 @@ void homeConfirmation(){
                   ),
                 ),
           
-              const SizedBox(height: 60),
-            // footer
+             
+          ],
+        ),
+        if (_isDrawerOpen)
+          GestureDetector(
+            onTap: () => setState(() => _isDrawerOpen = false),
+            child: Container(
+              color: Colors.black54, // Semi-transparent black
+            ),
+          ),
+
+        // Drawer - positioned on top of everything
+        Positioned(
+          right: _isDrawerOpen ? 0 : -300, // Animation offset
+          top: 0,
+          bottom: 0,
+          width: 300, // Match your drawer width
+          child: CustomDrawer(
+            isDrawerOpen: _isDrawerOpen,
+            onCloseDrawer: () => setState(() => _isDrawerOpen = false),
+          ),
+        ),
+        ]
+      ),
+
+       bottomNavigationBar: // footer
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               decoration: BoxDecoration(
                 color: const Color.fromARGB(255, 31, 28, 28),
                 boxShadow: [
                   BoxShadow(
-                    color: Color.fromRGBO(36, 34, 34, 0.2),
+                    color: Color.fromRGBO(0, 0, 0, 0.2),
                     spreadRadius: 2,
                     blurRadius: 5,
                   ),
@@ -926,15 +939,12 @@ void homeConfirmation(){
                   // Home
                   GestureDetector(
                     onTap: homeConfirmation,
-                    child: Icon(Icons.home, color: const Color.fromARGB(255, 255, 255, 255), size: 40,),
+                    child: Icon(Icons.home, color: const Color.fromARGB(255, 255, 255, 255), size: 34,),
                       
                   ),
-            
                   // Profile
                   GestureDetector(
-                    onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
-                    },
+                    onTap: () => setState(() => _isDrawerOpen = !_isDrawerOpen),
                     child: CircleAvatar(
                       radius: 20,
                       backgroundImage: AssetImage('lib/images/cat.jpeg'),
@@ -943,11 +953,7 @@ void homeConfirmation(){
                   )
                 ],
               ),
-            )
-          ],
-        ),
-        ]
-      ),
+            ),
     );
   }
 }

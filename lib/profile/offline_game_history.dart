@@ -23,12 +23,11 @@ class _OfflineGameHistoryState extends State<OfflineGameHistory> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+      backgroundColor: const Color.fromARGB(255, 52, 52, 52),
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Offline Game History', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-        backgroundColor: const Color.fromARGB(255, 111, 78, 55
-      ),
+        backgroundColor: const Color.fromARGB(255, 31, 28, 28),
       ),
       body: ValueListenableBuilder(
         valueListenable: _gameHistoryBox.listenable(), 
@@ -52,7 +51,7 @@ class _OfflineGameHistoryState extends State<OfflineGameHistory> {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: ListTile(
-                  leading: const Icon(Icons.history, color: Colors.black),
+                  leading: const Icon(Icons.history, color: Colors.green),
               title: Text(
                 '${game.player1} vs ${game.player2}', 
                 style: const TextStyle(fontWeight: FontWeight.bold)),

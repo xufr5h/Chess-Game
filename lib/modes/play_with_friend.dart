@@ -22,6 +22,7 @@ class PlayWithFriend extends StatefulWidget {
 }
 
 class _PlayWithFriendState extends State<PlayWithFriend> {
+  bool _isDrawerOpen = false;
   // creating a 2D chess list representing the chess board
  late List<List<chessPiece?>> board;
 
@@ -840,7 +841,7 @@ void resetConfirmation(){
             
             // white player
               Padding(
-                padding: const EdgeInsets.only(left: 10),
+                padding: const EdgeInsets.only(left: 10, bottom: 40),
                 child: Column(
                   children: [
                     Row(
@@ -892,10 +893,35 @@ void resetConfirmation(){
                   ),
                   ],
                 ),
+                
               ),
-        
-            const SizedBox(height: 60),
-            // footer
+            
+          ],
+        ),
+         const SizedBox(height: 60),
+              if (_isDrawerOpen)
+            GestureDetector(
+              onTap: () => setState(() => _isDrawerOpen = false),
+              child: Container(
+                color: Colors.black54, // Semi-transparent black
+              ),
+            ),
+
+          // Drawer - positioned on top of everything
+          Positioned(
+            right: _isDrawerOpen ? 0 : -300, // Animation offset
+            top: 0,
+            bottom: 0,
+            width: 300, // Match your drawer width
+            child: CustomDrawer(
+              isDrawerOpen: _isDrawerOpen,
+              onCloseDrawer: () => setState(() => _isDrawerOpen = false),
+            ),
+          ),
+      ],
+
+      ),
+      bottomNavigationBar: // footer
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
               decoration: BoxDecoration(
@@ -924,9 +950,7 @@ void resetConfirmation(){
                   ),
                   // Profile
                   GestureDetector(
-                    onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfile()));
-                    },
+                    onTap: () => setState(() => _isDrawerOpen = !_isDrawerOpen),
                     child: CircleAvatar(
                       radius: 20,
                       backgroundImage: AssetImage('lib/images/cat.jpeg'),
@@ -935,11 +959,7 @@ void resetConfirmation(){
                   )
                 ],
               ),
-            )
-          ],
-        ),
-      ]
-      ),
+            ),
     );
   }
 }

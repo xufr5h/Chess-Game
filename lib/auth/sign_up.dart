@@ -114,7 +114,7 @@ class _SignUpState extends State<SignUp> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+      backgroundColor: const Color.fromARGB(255, 31, 28, 28),
       body: SafeArea(
         child: SingleChildScrollView( 
           child: Container(
@@ -129,6 +129,7 @@ class _SignUpState extends State<SignUp> {
                     'lib/images/logo.png',
                     height: 300,
                     width: 300,
+                    color: Colors.white,
                   ),
                 ),
                 // Sign In Text
@@ -136,7 +137,7 @@ class _SignUpState extends State<SignUp> {
                   'Sign Up',
                   style: TextStyle(
                     fontSize: 40,
-                    color: Colors.black,
+                    color: Color.fromARGB(255, 255, 255, 255),
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
@@ -175,7 +176,7 @@ class _SignUpState extends State<SignUp> {
                 ElevatedButton(
                   onPressed: signUpMethod,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: Colors.green,
                     padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)
@@ -190,7 +191,7 @@ class _SignUpState extends State<SignUp> {
                   // Or Text
                   const Text(
                     'OR',
-                    style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 38, 35, 35), fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold),
                   ),
                   // Continue with Google Button
                   const SizedBox(height: 30),
@@ -199,7 +200,7 @@ class _SignUpState extends State<SignUp> {
                       await signInWithGoogle();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                      backgroundColor:  Colors.green,
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)
@@ -218,13 +219,13 @@ class _SignUpState extends State<SignUp> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text('Already have an account? ',
-                      style: TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 255, 255, 255), fontWeight: FontWeight.bold),
                     ),
                     GestureDetector(
                       onTap: widget.showSignInPage, 
                       child: const Text(
                         'Sign In',
-                        style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 8, 16, 100), fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 20, 102, 255), fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
