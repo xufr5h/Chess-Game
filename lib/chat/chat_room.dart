@@ -62,6 +62,7 @@ class ChatRoom extends StatelessWidget {
           context, 
           MaterialPageRoute(builder: (context) => ChatPage(
             receiverEmail: user['email'],
+            receiverID: user['uid'],
           ),
         ),
         ),

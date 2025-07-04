@@ -175,7 +175,7 @@ class _GameModeState extends State<GameMode> {
 
   Widget _buildBottomNavBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
       decoration: BoxDecoration(
         color: const Color.fromARGB(255, 31, 28, 28),
         boxShadow: [
