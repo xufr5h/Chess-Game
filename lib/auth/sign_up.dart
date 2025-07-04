@@ -1,9 +1,6 @@
-import 'package:chess_app/modes/chess_board.dart';
 import 'package:chess_app/components/textfield.dart';
 import 'package:chess_app/modes/game_mode.dart';
-import 'package:chess_app/auth/sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -176,7 +173,7 @@ class _SignUpState extends State<SignUp> {
                 ElevatedButton(
                   onPressed: signUpMethod,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: const Color.fromARGB(255, 54, 138, 56),
                     padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)
@@ -200,7 +197,7 @@ class _SignUpState extends State<SignUp> {
                       await signInWithGoogle();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:  Colors.green,
+                      backgroundColor:  const Color.fromARGB(255, 54, 138, 56),
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)

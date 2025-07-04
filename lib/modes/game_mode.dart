@@ -119,7 +119,7 @@ class _GameModeState extends State<GameMode> {
             child: Material(
               elevation: 16,
               color: const Color.fromARGB(255, 35, 44, 49),
-              child: CustomDrawer(
+              child: MyProfile(
                 isDrawerOpen: _isDrawerOpen,
                 onCloseDrawer: () => setState(() => _isDrawerOpen = false),
               ),

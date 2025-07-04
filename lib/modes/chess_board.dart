@@ -912,7 +912,7 @@ void homeConfirmation(){
           top: 0,
           bottom: 0,
           width: 300, // Match your drawer width
-          child: CustomDrawer(
+          child: MyProfile(
             isDrawerOpen: _isDrawerOpen,
             onCloseDrawer: () => setState(() => _isDrawerOpen = false),
           ),

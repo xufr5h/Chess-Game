@@ -52,14 +52,14 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+      backgroundColor: const Color.fromARGB(255, 52, 52, 55),
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
           'Forgot Password',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
           ),
-        backgroundColor: const Color.fromARGB(255, 111, 78, 55),
+        backgroundColor: const Color.fromARGB(255, 31, 28, 28),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
