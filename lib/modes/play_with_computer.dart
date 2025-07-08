@@ -469,12 +469,41 @@ void movePiece(int newRow, int newColumn) async {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('CHECKMATE!'),
-            content: Text('${currentPlayerIsWhite ? whitePlayerEmail : blackPlayerName} wins!'),
+            backgroundColor: const Color.fromARGB(255, 35, 44, 49),
+            title: const Text(
+              'CHECKMATE!',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+              ),
+            content: Row(
+              children: [
+                Text(
+                  '${currentPlayerIsWhite ? whitePlayerEmail : blackPlayerName} wins!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  ),
+                  Icon(
+                    Icons.emoji_events,
+                    color:const Color.fromARGB(255, 233, 210, 2), 
+                  )
+              ],
+            ),
             actions: [
               TextButton(
                 onPressed: resetGame,
-                child: const Text('Play Again'),
+                child: const Text(
+                  'Play Again',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 72, 161, 58),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  ),
               ),
             ],
           ),
@@ -743,7 +772,8 @@ void resetConfirmation(){
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Playing With Computer', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),),
-        backgroundColor: const Color.fromARGB(255, 31, 28, 28),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
       ),
       body: Stack(
         children: [

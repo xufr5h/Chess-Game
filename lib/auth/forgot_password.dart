@@ -60,6 +60,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
           ),
         backgroundColor: const Color.fromARGB(255, 31, 28, 28),
+        foregroundColor: Colors.white,
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,

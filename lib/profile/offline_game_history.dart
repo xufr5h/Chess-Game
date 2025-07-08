@@ -27,7 +27,8 @@ class _OfflineGameHistoryState extends State<OfflineGameHistory> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Offline Game History', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-        backgroundColor: const Color.fromARGB(255, 31, 28, 28),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
       ),
       body: ValueListenableBuilder(
         valueListenable: _gameHistoryBox.listenable(), 
@@ -47,16 +48,27 @@ class _OfflineGameHistoryState extends State<OfflineGameHistory> {
           return ListView.builder(
             itemCount: box.length,
             itemBuilder: (context, index){
-              final game = box.getAt(index)!;
+              final result = games[index].result.trim().toLowerCase();
+              final game = games[index];
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: ListTile(
                   leading: const Icon(Icons.history, color: Colors.green),
-              title: Text(
-                '${game.player1} vs ${game.player2}', 
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+              title: Row(
+                children: [
+                  Text(
+                    '${result}', 
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 10),
+                  Icon(
+                    Icons.emoji_events,
+                    color: Colors.yellow[700],
+                    size: 30,
+                  )
+                ],
+              ),
                   subtitle: Text(
-                    'Result: ${game.result}\n'
+                    'Players: ${game.player1} vs ${game.player2} \n'
                     'Date: ${DateFormat('yyyy-MM-dd – kk:mm').format(game.playedAt)}\n',
                     style: const TextStyle(color: Colors.black54, fontSize: 14),
                 ),
@@ -65,7 +77,6 @@ class _OfflineGameHistoryState extends State<OfflineGameHistory> {
             }
           );
         }
-        
         ),
     );
   }

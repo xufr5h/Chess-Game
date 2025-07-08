@@ -37,19 +37,19 @@ class _MyProfileState extends State<MyProfile> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color.fromARGB(255, 81, 39, 25),
-        title: const Text('Are you sure you want to sign out?', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color.fromARGB(255, 35, 44, 49),
+        title: const Text('Are you sure you want to sign out?', style: TextStyle(color: Colors.white, fontSize: 20)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('No', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            child: const Text('No', style: TextStyle(color:  Color.fromARGB(255, 72, 161, 58), fontSize: 16, fontWeight: FontWeight.bold)),
           ),
           TextButton(
             onPressed: () {
               _signOut();
               Navigator.pop(context);
             },
-            child: const Text('Yes', style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold)),
+            child: const Text('Yes', style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -60,19 +60,19 @@ class _MyProfileState extends State<MyProfile> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color.fromARGB(255, 81, 39, 25),
-        title: const Text('Are you sure you want to delete your account?', style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color.fromARGB(255, 35, 44, 49),
+        title: const Text('Are you sure you want to delete your account?', style: TextStyle(color: Colors.white, fontSize: 20)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('No', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            child: const Text('No', style: TextStyle(color: Color.fromARGB(255, 72, 161, 58), fontSize: 16, fontWeight: FontWeight.bold)),
           ),
           TextButton(
             onPressed: () {
               _deleteAccount();
               Navigator.pop(context);
             },
-            child: const Text('Yes', style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold)),
+            child: const Text('Yes', style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

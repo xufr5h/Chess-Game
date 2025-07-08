@@ -17,6 +17,8 @@ class _SignUpState extends State<SignUp> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool isEmailLoading = false;
+  bool isGoogleLoading = false;
 
   @override
   void dispose() {
@@ -45,6 +47,9 @@ class _SignUpState extends State<SignUp> {
 
   // google sign in method 
   Future <UserCredential?> signInWithGoogle() async {
+    setState(() {
+      isGoogleLoading = true;
+    });
     try {
       final googleUser = await GoogleSignIn().signIn();
       final googleAuth = await googleUser?.authentication;
@@ -66,17 +71,27 @@ class _SignUpState extends State<SignUp> {
       return userCredential;
     } catch (e) {
       print('Error signing in with Google: $e');
+    } finally {
+      setState(() {
+        isGoogleLoading = false;
+      });
     }
     return null;
   }
 
   // manual sign up method
-  Future<void> signUpMethod() async {
+  Future<void> signUpMethod() async { 
+  setState(() {
+    isEmailLoading = true;
+  });
   final email = _emailController.text.trim();
   final password = _passwordController.text.trim();
   final confirmPassword = _confirmPasswordController.text.trim();
 
   if (password != confirmPassword) {
+    setState(() {
+      isEmailLoading = false;
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Passwords do not match')),
     );
@@ -103,6 +118,10 @@ class _SignUpState extends State<SignUp> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Sign up failed: $e')),
     );
+  } finally {
+    setState(() {
+      isEmailLoading = false;
+    });
   }
 }
 
@@ -179,7 +198,11 @@ class _SignUpState extends State<SignUp> {
                       borderRadius: BorderRadius.circular(10)
                     )
                   ),
-                  child: const Text("Sign Up",
+                  child: isEmailLoading
+                  ? const CircularProgressIndicator(
+                      color: Colors.white,
+                    ) :
+                  const Text("Sign Up",
                     style: TextStyle(fontSize: 20, color: Colors.white,),
                   ),
                 ),
@@ -203,7 +226,11 @@ class _SignUpState extends State<SignUp> {
                         borderRadius: BorderRadius.circular(10)
                       )
                     ),
-                    child: const Text(
+                    child: isGoogleLoading
+                  ? const CircularProgressIndicator(
+                      color: Colors.white,
+                    ) :
+                    const Text(
                       'Sign Up with Google',
                       style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 255, 255, 255), ),
                     ),

@@ -21,6 +21,7 @@ class ChatRoom extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: const Color.fromARGB(255, 31, 28, 28),
+        foregroundColor: Colors.white,
       ),
       body: _buildUserList(),
     );

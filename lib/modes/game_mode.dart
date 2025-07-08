@@ -26,7 +26,7 @@ class _GameModeState extends State<GameMode> {
           'Game Mode',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color.fromARGB(255, 31, 28, 28),
+        backgroundColor: Colors.transparent,
       ),
       body: Stack(
         children: [

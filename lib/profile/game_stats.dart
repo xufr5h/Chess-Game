@@ -63,10 +63,11 @@ class _MyStatsState extends State<MyStats> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 52, 52, 52),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 31, 28, 28),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
         centerTitle: true,
         title: const Text(
-          'My Profile',
+          'Game Statistics',
           style: TextStyle(color: Colors.white),
           ),
       ),

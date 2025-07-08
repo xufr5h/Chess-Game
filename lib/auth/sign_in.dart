@@ -19,6 +19,8 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool isEmailLoading = false;
+  bool isGoogleLoading = false;
 
   @override
   void dispose() {
@@ -46,6 +48,9 @@ class _SignInState extends State<SignIn> {
 
   // google sign in method 
   Future <UserCredential?> signInWithGoogle() async {
+    setState(() {
+      isGoogleLoading = true;
+    });
     try {
       final googleUser = await GoogleSignIn().signIn();
       final googleAuth = await googleUser?.authentication;
@@ -67,12 +72,19 @@ class _SignInState extends State<SignIn> {
       return userCredential;
     } catch (e) {
       print('Error signing in with Google: $e');
+    } finally {
+      setState(() {
+        isGoogleLoading = false;
+      });
     }
     return null;
   }
 
   // manual sign in method
   Future signInMethod() async {
+    setState(() {
+      isEmailLoading = true;
+    });
     try {
       UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(), 
@@ -93,6 +105,10 @@ class _SignInState extends State<SignIn> {
       }
     } catch (e) {
       print('Error signing in: $e');
+    } finally {
+      setState(() {
+        isEmailLoading = false;
+      });
     }
   }
 
@@ -178,7 +194,12 @@ class _SignInState extends State<SignIn> {
                       borderRadius: BorderRadius.circular(10)
                     )
                   ),
-                  child: const Text("Sign In",
+                  child: isEmailLoading
+                  ? const CircularProgressIndicator(
+                      color: Colors.white,
+                    )
+                    :
+                  const Text("Sign In",
                     style: TextStyle(fontSize: 20, color: Colors.white),
                   ),
                 ),
@@ -202,7 +223,11 @@ class _SignInState extends State<SignIn> {
                       borderRadius: BorderRadius.circular(10)
                     )
                   ),
-                  child: const Text(
+                  child: isGoogleLoading
+                  ? const CircularProgressIndicator(
+                      color: Colors.white,
+                    ) :
+                  const Text(
                     'Continue with Google',
                     style: TextStyle(fontSize: 20, color: Color.fromARGB(255, 255, 255, 255)),
                   ),
