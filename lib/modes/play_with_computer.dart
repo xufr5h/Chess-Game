@@ -1,15 +1,11 @@
 import 'dart:math';
 import 'package:chess_app/components/dead_pieces.dart';
-import 'package:chess_app/components/input_name.dart';
 import 'package:chess_app/components/pieces.dart';
 import 'package:chess_app/components/square.dart';
 import 'package:chess_app/modes/game_mode.dart';
-import 'package:chess_app/helper/offline_game_record.dart';
-import 'package:chess_app/profile/game_stats.dart';
 import 'package:flutter/material.dart';
 import 'package:chess_app/helper/helper_method.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:hive/hive.dart';
 import 'package:chess_app/profile/profile.dart';
 
 class PlayWithComputer extends StatefulWidget {

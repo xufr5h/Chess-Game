@@ -1,9 +1,11 @@
 import 'package:chess_app/chat/chat_service.dart';
 import 'package:chess_app/components/chat_bubble.dart';
 import 'package:chess_app/components/textfield.dart';
+import 'package:chess_app/helper/app_constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+// import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 class ChatPage extends StatefulWidget {
   final String receiverEmail;
@@ -69,10 +71,16 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _sendMessage() async {
     if (_messageController.text.trim().isEmpty || currentUser == null) return;
+
+    // clearing the text field
+    final message = _messageController.text.trim();
+    _messageController.clear();
+    setState(() {
+      
+    });
     
     try {
-      await _chatService.sendMessgae(widget.receiverID, _messageController.text.trim());
-      _messageController.clear();
+      await _chatService.sendMessgae(widget.receiverID, message);
       _scrollToBottom();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -80,6 +88,32 @@ class _ChatPageState extends State<ChatPage> {
       );
     }
   }
+
+  // method to start a call
+  // void _startCall(){
+  //   final currentUserId = currentUser?.uid;
+  //   final currentUserEmail = currentUser?.email;
+  //   if (currentUserId == null) {
+  //     return;
+  //   }
+  //   // create a call ID
+  //   final callID = (currentUserId.compareTo(widget.receiverID) <0)
+  //         ? '$currentUserId-${widget.receiverID}'
+  //         : '${widget.receiverID}-$currentUserId';
+  //   // start the call
+  //   Navigator.push(
+  //     context, 
+  //     MaterialPageRoute(
+  //       builder: (context) => ZegoUIKitPrebuiltCall(
+  //         appID: AppConstants.APP_ID, 
+  //         callID: callID, 
+  //         userID: currentUserId, 
+  //         userName: currentUserEmail ?? 'User', 
+  //         config: ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall()
+  //         ),
+  //       ),
+  //   ); 
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +129,13 @@ class _ChatPageState extends State<ChatPage> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
+        // actions: [
+        //   IconButton(
+        //     onPressed: _startCall, 
+        //     icon: const Icon(Icons.call, color: Colors.green, size: 28
+        //   ),
+        // ),
+        // ],
       ),
       body: SafeArea(
         child: Column(

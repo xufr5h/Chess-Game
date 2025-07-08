@@ -1,4 +1,5 @@
 import 'package:chess_app/auth/main_page.dart';
+import 'package:chess_app/helper/app_constants.dart';
 import 'package:chess_app/helper/offline_game_record.dart';
 import 'package:chess_app/helper/user_score.dart';
 import 'package:chess_app/auth/sign_in.dart';
@@ -10,6 +11,8 @@ import 'package:provider/provider.dart';
 import 'firebase_options.dart'; 
 import 'package:hive/hive.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -20,8 +23,6 @@ void main() async{
   await Hive.initFlutter();
   // regsitering the adaper
   Hive.registerAdapter(OfflineGameRecordAdapter());
-  // creating the box
-  await Hive.openBox<OfflineGameRecord>('humanGameRecords');
 
   // wrapping the app with ChangeNotifierProvider
   runApp(
@@ -37,7 +38,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       home: MainPage(),
     );

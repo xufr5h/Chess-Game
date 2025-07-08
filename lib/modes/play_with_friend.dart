@@ -1,15 +1,15 @@
 import 'package:chess_app/components/dead_pieces.dart';
-import 'package:chess_app/components/input_name.dart';
 import 'package:chess_app/components/pieces.dart';
 import 'package:chess_app/components/square.dart';
+import 'package:chess_app/helper/hive_helper.dart';
 import 'package:chess_app/modes/game_mode.dart';
 import 'package:chess_app/helper/offline_game_record.dart';
-import 'package:chess_app/profile/game_stats.dart';
 import 'package:flutter/material.dart';
 import 'package:chess_app/helper/helper_method.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive/hive.dart';
 import 'package:chess_app/profile/profile.dart';
+import 'package:uuid/uuid.dart';
 
 
 class PlayWithFriend extends StatefulWidget {
@@ -538,14 +538,22 @@ Future<void> _storeGameLocally({
   required String result,
   required DateTime playedAt,
 }) async {
-  final box = Hive.box<OfflineGameRecord>('humanGameRecords');
-  final game = OfflineGameRecord(
-    player1: player1, 
-    player2: player2, 
-    result: result, 
-    playedAt: DateTime.now(),);
+  try {
+    final box = await openUserHistoryBox();
+    final gameId = const Uuid().v4();
+    final game = OfflineGameRecord(
+      player1: player1, 
+      player2: player2, 
+      result: result, 
+      playedAt: playedAt,
+      gameId: gameId,
+    );
     await box.add(game);
-    debugPrint("Game saved Locally");
+    await syncGameToFirestore(game);
+    debugPrint("Game saved Locally and synced to Firestore: $player1 vs $player2");
+  } catch (e) {
+    debugPrint("Error saving game locally: $e");
+  }
 }
 
 // notation for the move

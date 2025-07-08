@@ -13,6 +13,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   final TextEditingController _emailController = TextEditingController();
 
   // disposing the controller
+  @override
   void dispose() {
     _emailController.dispose();
     super.dispose();

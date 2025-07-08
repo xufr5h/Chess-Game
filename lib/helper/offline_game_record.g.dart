@@ -21,13 +21,14 @@ class OfflineGameRecordAdapter extends TypeAdapter<OfflineGameRecord> {
       player2: fields[1] as String,
       result: fields[2] as String,
       playedAt: fields[3] as DateTime,
+      gameId: fields[4] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, OfflineGameRecord obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.player1)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class OfflineGameRecordAdapter extends TypeAdapter<OfflineGameRecord> {
       ..writeByte(2)
       ..write(obj.result)
       ..writeByte(3)
-      ..write(obj.playedAt);
+      ..write(obj.playedAt)
+      ..writeByte(4)
+      ..write(obj.gameId);
   }
 
   @override

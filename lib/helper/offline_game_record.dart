@@ -12,11 +12,14 @@ class OfflineGameRecord {
   final String result; 
   @HiveField(3)
   final DateTime playedAt;
+  @HiveField(4)
+  final String? gameId;
 
   OfflineGameRecord({
     required this.player1,
     required this.player2,
     required this.result,
     required this.playedAt,
+    required this.gameId,
   });
 }
