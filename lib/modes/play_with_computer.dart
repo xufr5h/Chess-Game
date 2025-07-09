@@ -545,7 +545,101 @@ void _makeComputerMove(){
     selectedRow = selectedMove['fromRow'];
     selectedColumn = selectedMove['fromColumn'];
     movePiece(selectedMove['toRow'], selectedMove['toColumn']);
-  }
+  } else {
+    // No legal moves left for the computer
+    checkStatus = isKingInCheck(false);
+    if (isCheckmate(false)) {
+      if (mounted) {
+        showDialog(
+          context: context, 
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color.fromARGB(255, 35, 44, 49),
+            title: const Text(
+              'CHECKMATE!',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+              ),
+            content: Row(
+              children: [
+                Text(
+                  '$whitePlayerEmail wins!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  ),
+                  Icon(
+                    Icons.emoji_events,
+                    color:const Color.fromARGB(255, 233, 210, 2), 
+                  )
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: resetGame,
+                child: const Text(
+                  'Play Again',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 72, 161, 58),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  ),
+              ),
+            ],
+          ),
+        );
+      }
+    } else if (!checkStatus){
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color.fromARGB(255, 35, 44, 49),
+            title: const Text(
+              'STALEMATE!',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+              ),
+            content: Row(
+              children: [
+                Text(
+                  'The game is a draw',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  ),
+                  Icon(
+                    Icons.emoji_emotions,
+                    color:const Color.fromARGB(255, 233, 210, 2), 
+                  )
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: resetGame,
+                child: const Text(
+                  'Play Again',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 72, 161, 58),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  ),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  } 
 }
 
 
