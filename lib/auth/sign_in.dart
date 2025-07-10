@@ -37,7 +37,7 @@ class _SignInState extends State<SignIn> {
     if (!docSnapshot.exists) {
       await userDoc.set({
         'email': user.email,
-        'uid': user.displayName ?? user.uid,
+        'uid': user.uid,
         'gamesPlayed': 0,
         'gamesWon': 0,
         'gamesLost': 0,
