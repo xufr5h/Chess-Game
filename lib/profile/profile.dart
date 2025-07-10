@@ -1,5 +1,6 @@
 import 'package:chess_app/chat/chat_room.dart';
 import 'package:chess_app/helper/online_status.dart';
+import 'package:chess_app/profile/chessboard_theme.dart';
 import 'package:chess_app/profile/game_stats.dart';
 import 'package:chess_app/profile/offline_game_history.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -150,6 +151,19 @@ class _MyProfileState extends State<MyProfile> {
               );
             },
           ),
+
+          // chess board theme
+          ListTile(
+            leading: const Image(image: AssetImage('lib/images/theme.png'), width: 24, height: 24, color: Colors.white,),
+            title: const Text('Select Theme', style: TextStyle(color: Colors.white)),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) =>  ChessboardTheme()),
+              );
+            },
+          ),
+
 
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.white),

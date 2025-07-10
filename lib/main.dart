@@ -1,6 +1,7 @@
 import 'package:chess_app/auth/main_page.dart';
 import 'package:chess_app/helper/app_constants.dart';
 import 'package:chess_app/helper/offline_game_record.dart';
+import 'package:chess_app/helper/theme_provider.dart';
 import 'package:chess_app/helper/user_score.dart';
 import 'package:chess_app/auth/sign_in.dart';
 import 'package:chess_app/auth/sign_up.dart';
@@ -26,11 +27,15 @@ void main() async{
 
   // wrapping the app with ChangeNotifierProvider
   runApp(
-    ChangeNotifierProvider(
-      create:(context) => UserScore(),
-      child: const MyApp(),
-    ),
-  );
+    MultiProvider(
+      providers:[
+         ChangeNotifierProvider(
+        create:(context) => UserScore()),
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+      ],
+        child: const MyApp(),
+      ),
+    );
 }
 
 class MyApp extends StatelessWidget {

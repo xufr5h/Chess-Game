@@ -47,6 +47,8 @@ class _SignInState extends State<SignIn> {
     }
   }
 
+  
+
   // google sign in method 
   Future <UserCredential?> signInWithGoogle() async {
     setState(() {
@@ -54,6 +56,7 @@ class _SignInState extends State<SignIn> {
       setUserOnlineStatus(true);
     });
     try {
+     
       final googleUser = await GoogleSignIn().signIn();
       final googleAuth = await googleUser?.authentication;
       final credential = GoogleAuthProvider.credential(

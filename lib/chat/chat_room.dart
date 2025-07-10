@@ -46,7 +46,9 @@ class ChatRoom extends StatelessWidget {
         // return list of users
         return ListView(
           children: snapshot.data!
-          .map<Widget>((user) => _buildUserListItem(user, context)).toList(),
+          .cast<Map<String, dynamic>>()
+          .map((user) => _buildUserListItem(user, context))
+          .toList(),
         );
       }
     );

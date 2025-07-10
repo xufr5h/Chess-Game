@@ -12,7 +12,20 @@
           "package_name": "com.example.chess_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "407930904114-abh6kmv62uh4dcdkng81ivogfbdg3thv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.chess_app",
+            "certificate_hash": "9f840c47a60a16defa7ba3f766ad4516d74af4e2"
+          }
+        },
+        {
+          "client_id": "407930904114-j495chlcjdo5jljidfbc3egcfpnlldh2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBsxByTWVIcnCCqvYuQW_-_qXm6FQYubzs"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "407930904114-j495chlcjdo5jljidfbc3egcfpnlldh2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "407930904114-omdla72mjlnve964f0pr3q40q8ishlrq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.chessApp"
+              }
+            }
+          ]
         }
       }
     }

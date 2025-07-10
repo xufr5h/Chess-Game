@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+import 'package:zego_uikit/zego_uikit.dart';
 
 class ChatPage extends StatefulWidget {
   final String receiverEmail;
@@ -109,17 +110,21 @@ class _ChatPageState extends State<ChatPage> {
           ? '$currentUserId-${widget.receiverID}'
           : '${widget.receiverID}-$currentUserId';
     // start the call
-    Navigator.push(
+    Future.delayed(
+      Duration(milliseconds: 500),
+      () => Navigator.push(
       context, 
       MaterialPageRoute(
         builder: (context) => ZegoUIKitPrebuiltCall(
           appID: AppConstants.APP_ID, 
+          appSign: AppConstants.APP_SIGN,
           callID: callID, 
           userID: currentUserId, 
           userName: currentUserEmail ?? 'User', 
           config: ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()
           ),
         ),
+    ),
     );
   }
 
@@ -147,6 +152,7 @@ class _ChatPageState extends State<ChatPage> {
       MaterialPageRoute(
         builder: (context) => ZegoUIKitPrebuiltCall(
           appID: AppConstants.APP_ID, 
+          appSign: AppConstants.APP_SIGN,
           callID: callID, 
           userID: currentUserId, 
           userName: currentUserEmail ?? 'User', 

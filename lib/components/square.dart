@@ -1,5 +1,7 @@
 import 'package:chess_app/components/pieces.dart';
+import 'package:chess_app/helper/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; 
 
 class Square extends StatelessWidget {
 
@@ -22,19 +24,20 @@ class Square extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Provider.of<ThemeProvider>(context).currentTheme;
     Color? squareColor;
     Color? borderColor;
     double borderWidth = 1;
     if (isSelected) {
-      squareColor = const Color.fromARGB(255, 175, 235, 11).withAlpha(150);
+      squareColor = theme.selectedSquareColor;
     } 
     else {
-      squareColor = isWhite ? const Color.fromARGB(255, 245, 245, 220).withAlpha(180) : const Color.fromARGB(255, 72, 161, 58).withAlpha(150);
+      squareColor = isWhite ? theme.lightSquareColor : theme.darkSquareColor;
     }
 
     // add red border if the king is in check
     if (isInCheck && piece?.type == chessPieceType.king) {
-      borderColor = Colors.red;
+      borderColor = theme.checkBorderColor;
       borderWidth = 2.0;
     }
 
@@ -61,7 +64,7 @@ class Square extends StatelessWidget {
                 width: 16,
                 height: 16,
                 decoration: BoxDecoration(
-                  color: Colors.lightGreenAccent.withAlpha(150),
+                  color: theme.validMoveColor,
                   shape: BoxShape.circle,
                 ),
               ),
