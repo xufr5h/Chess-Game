@@ -2,10 +2,11 @@ import 'package:chess_app/chat/chat_service.dart';
 import 'package:chess_app/components/chat_bubble.dart';
 import 'package:chess_app/components/textfield.dart';
 import 'package:chess_app/helper/app_constants.dart';
+import 'package:chess_app/helper/online_status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-// import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 class ChatPage extends StatefulWidget {
   final String receiverEmail;
@@ -89,31 +90,98 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  // method to start a call
-  // void _startCall(){
-  //   final currentUserId = currentUser?.uid;
-  //   final currentUserEmail = currentUser?.email;
-  //   if (currentUserId == null) {
-  //     return;
-  //   }
-  //   // create a call ID
-  //   final callID = (currentUserId.compareTo(widget.receiverID) <0)
-  //         ? '$currentUserId-${widget.receiverID}'
-  //         : '${widget.receiverID}-$currentUserId';
-  //   // start the call
-  //   Navigator.push(
-  //     context, 
-  //     MaterialPageRoute(
-  //       builder: (context) => ZegoUIKitPrebuiltCall(
-  //         appID: AppConstants.APP_ID, 
-  //         callID: callID, 
-  //         userID: currentUserId, 
-  //         userName: currentUserEmail ?? 'User', 
-  //         config: ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall()
-  //         ),
-  //       ),
-  //   ); 
-  // }
+  // method to start a video call
+  void _startVideoCall() async {
+    final currentUserId = currentUser?.uid;
+    final currentUserEmail = currentUser?.email;
+    if (currentUserId == null) {
+      return;
+    }
+
+    // checking the receiver onlne status
+    final isReceiverOnline = await isUserOnline(widget.receiverID);
+    if (!isReceiverOnline) {
+      _showUserOfflineDialog();
+      return;
+    }
+    // create a call ID
+    final callID = (currentUserId.compareTo(widget.receiverID) <0)
+          ? '$currentUserId-${widget.receiverID}'
+          : '${widget.receiverID}-$currentUserId';
+    // start the call
+    Navigator.push(
+      context, 
+      MaterialPageRoute(
+        builder: (context) => ZegoUIKitPrebuiltCall(
+          appID: AppConstants.APP_ID, 
+          callID: callID, 
+          userID: currentUserId, 
+          userName: currentUserEmail ?? 'User', 
+          config: ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()
+          ),
+        ),
+    );
+  }
+
+  //method to start a call
+  void _startCall() async {
+    final currentUserId = currentUser?.uid;
+    final currentUserEmail = currentUser?.email;
+    if (currentUserId == null) {
+      return;
+    }
+
+    // checking the receiver onlne status
+    final isReceiverOnline = await isUserOnline(widget.receiverID);
+    if (!isReceiverOnline) {
+      _showUserOfflineDialog();
+      return;
+    }
+    // create a call ID
+    final callID = (currentUserId.compareTo(widget.receiverID) <0)
+          ? '$currentUserId-${widget.receiverID}'
+          : '${widget.receiverID}-$currentUserId';
+    // start the call
+    Navigator.push(
+      context, 
+      MaterialPageRoute(
+        builder: (context) => ZegoUIKitPrebuiltCall(
+          appID: AppConstants.APP_ID, 
+          callID: callID, 
+          userID: currentUserId, 
+          userName: currentUserEmail ?? 'User', 
+          config: ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall()
+          ),
+        ),
+    ); 
+  }
+
+  // offline dialog
+  void _showUserOfflineDialog(){
+      showDialog(
+        context: context, 
+        builder: (context) => AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 35, 44, 49),
+          title: const Text(
+            'User is offline',
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+          content: const Text(
+            'The user you are trying to call is currently offline.',
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'OK',
+                style: TextStyle(color: Colors.green, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        )
+      );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,13 +197,19 @@ class _ChatPageState extends State<ChatPage> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
-        // actions: [
-        //   IconButton(
-        //     onPressed: _startCall, 
-        //     icon: const Icon(Icons.call, color: Colors.green, size: 28
-        //   ),
-        // ),
-        // ],
+        actions: [
+          IconButton(
+            onPressed: _startCall, 
+            icon: const Icon(Icons.call, color: Colors.green, size: 28
+          ),
+        ),
+        Container(
+          margin: const EdgeInsets.only(right: 10),
+          child: IconButton(
+            onPressed: _startVideoCall, 
+            icon: const Icon(Icons.videocam, color: Colors.green, size: 30),),
+        )
+        ],
       ),
       body: SafeArea(
         child: Column(

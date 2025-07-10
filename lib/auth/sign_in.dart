@@ -1,5 +1,6 @@
 import 'package:chess_app/components/textfield.dart';
 import 'package:chess_app/auth/forgot_password.dart';
+import 'package:chess_app/helper/online_status.dart';
 import 'package:chess_app/modes/game_mode.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -50,6 +51,7 @@ class _SignInState extends State<SignIn> {
   Future <UserCredential?> signInWithGoogle() async {
     setState(() {
       isGoogleLoading = true;
+      setUserOnlineStatus(true);
     });
     try {
       final googleUser = await GoogleSignIn().signIn();
@@ -84,6 +86,7 @@ class _SignInState extends State<SignIn> {
   Future signInMethod() async {
     setState(() {
       isEmailLoading = true;
+      setUserOnlineStatus(true);
     });
     try {
       UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(

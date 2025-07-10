@@ -1,4 +1,5 @@
 import 'package:chess_app/components/textfield.dart';
+import 'package:chess_app/helper/online_status.dart';
 import 'package:chess_app/modes/game_mode.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -49,6 +50,7 @@ class _SignUpState extends State<SignUp> {
   Future <UserCredential?> signInWithGoogle() async {
     setState(() {
       isGoogleLoading = true;
+      setUserOnlineStatus(true);
     });
     try {
       final googleUser = await GoogleSignIn().signIn();
@@ -83,6 +85,7 @@ class _SignUpState extends State<SignUp> {
   Future<void> signUpMethod() async { 
   setState(() {
     isEmailLoading = true;
+    setUserOnlineStatus(true);
   });
   final email = _emailController.text.trim();
   final password = _passwordController.text.trim();

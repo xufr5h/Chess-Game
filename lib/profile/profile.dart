@@ -1,4 +1,5 @@
 import 'package:chess_app/chat/chat_room.dart';
+import 'package:chess_app/helper/online_status.dart';
 import 'package:chess_app/profile/game_stats.dart';
 import 'package:chess_app/profile/offline_game_history.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -26,6 +27,9 @@ class _MyProfileState extends State<MyProfile> {
 // sign out method
   Future <void> _signOut() async{
     await FirebaseAuth.instance.signOut();
+    setState(() {
+      setUserOnlineStatus(false);
+    });
   }
 
   // delete account method
