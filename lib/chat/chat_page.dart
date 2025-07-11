@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
 import 'package:zego_uikit/zego_uikit.dart';
 
 class ChatPage extends StatefulWidget {
@@ -32,6 +33,13 @@ class _ChatPageState extends State<ChatPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   User? get currentUser => _auth.currentUser;
+
+  // configuring the zegocall
+  final ZegoUIKitPrebuiltCallConfig config = ZegoUIKitPrebuiltCallConfig(
+    turnOnCameraWhenJoining: true,
+    turnOnMicrophoneWhenJoining: true,
+    useSpeakerWhenJoining: true,
+  );
 
   @override
   void initState() {
@@ -92,84 +100,22 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  // method to start a video call
-  void _startVideoCall() async {
-    final currentUserId = currentUser?.uid;
-    final currentUserEmail = currentUser?.email;
-    if (currentUserId == null) {
-      return;
-    }
-
-    // checking the receiver onlne status
-    try {
-      final isReceiverOnline = await isUserOnline(widget.receiverID);
-    if (!isReceiverOnline) {
-      _showUserOfflineDialog();
-      return;
-    }
-    // create a call ID
-    final callID = (currentUserId.compareTo(widget.receiverID) <0)
-          ? '$currentUserId-${widget.receiverID}'
-          : '${widget.receiverID}-$currentUserId';
-    // start the call
-    Future.delayed(
-      Duration(milliseconds: 500),
-      () => Navigator.push(
-      context, 
-      MaterialPageRoute(
-        builder: (context) => ZegoUIKitPrebuiltCall(
-          appID: AppConstants.APP_ID, 
-          appSign: AppConstants.APP_SIGN,
-          callID: callID, 
-          userID: currentUserId, 
-          userName: currentUserEmail ?? 'User', 
-          config: ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()
-          ),
-        ),
-    ),
-    );
-    } catch (e) {
-      debugPrint('Error checking receiver online status: $e');
-       ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error checking user status: $e')),
-    );
-    }
-    
-  }
-
-  //method to start a call
-  void _startCall() async {
-    final currentUserId = currentUser?.uid;
-    final currentUserEmail = currentUser?.email;
-    if (currentUserId == null) {
-      return;
-    }
-
-    // checking the receiver onlne status
-    final isReceiverOnline = await isUserOnline(widget.receiverID);
-    debugPrint('Receiver online status: $isReceiverOnline');
-    if (!isReceiverOnline) {
-      _showUserOfflineDialog();
-      return;
-    }
-    // create a call ID
-    final callID = (currentUserId.compareTo(widget.receiverID) <0)
-          ? '$currentUserId-${widget.receiverID}'
-          : '${widget.receiverID}-$currentUserId';
-    // start the call
-    Navigator.push(
-      context, 
-      MaterialPageRoute(
-        builder: (context) => ZegoUIKitPrebuiltCall(
-          appID: AppConstants.APP_ID, 
-          appSign: AppConstants.APP_SIGN,
-          callID: callID, 
-          userID: currentUserId, 
-          userName: currentUserEmail ?? 'User', 
-          config: ZegoUIKitPrebuiltCallConfig.oneOnOneVoiceCall()
-          ),
-        ),
-    ); 
+  // start call method
+  void _startCall(BuildContext context, String receiverID, String receiverEmail, bool isVideoCall){
+    final resourceID = isVideoCall ? 'zegouikit_video_call' : 'zegouikit_audio_call';
+    ZegoUIKitPrebuiltCallInvitationService().send(
+      invitees: [
+        ZegoCallUser(receiverID, receiverEmail)
+      ], 
+      isVideoCall: isVideoCall,
+      resourceID: resourceID,
+    ).then((result){
+      if (!result) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to start call')),
+        );
+      }
+    });
   }
 
 // offline dialog
@@ -207,43 +153,30 @@ class _ChatPageState extends State<ChatPage> {
       resizeToAvoidBottomInset: false, // Changed to false
       appBar: AppBar(
         centerTitle: true,
-        title: Row(
-          children: [
-            StreamBuilder<bool>(
-              stream: getUserOnlineStatusStream(widget.receiverID), 
-              builder: (context, snapshot){
-                final isOnline = snapshot.data ?? false;
-                return Image.asset(
-                  'lib/images/online.png',
-                  height: 12,
-                  width: 12,
-                  color: isOnline ? Colors.green : Colors.grey,
-                );
-              }
-            ),
-            const SizedBox(width: 8),
+        title:
             Flexible(
               child: Text(
                 widget.receiverEmail,
                 style: const TextStyle(color: Colors.white),
               ),
-            ),
-            
-          ],
-        ),
+            ),    
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
           IconButton(
-            onPressed: _startCall, 
+            onPressed: (){
+              _startCall(context, widget.receiverID, widget.receiverEmail, false);
+            },
             icon: const Icon(Icons.call, color: Colors.green, size: 28
           ),
         ),
         Container(
           margin: const EdgeInsets.only(right: 10),
           child: IconButton(
-            onPressed: _startVideoCall, 
+            onPressed: (){
+              _startCall(context, widget.receiverID, widget.receiverEmail, true);
+            },
             icon: const Icon(Icons.videocam, color: Colors.green, size: 30),),
         )
         ],

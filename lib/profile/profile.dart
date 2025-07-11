@@ -1,3 +1,4 @@
+import 'package:chess_app/auth/sign_in.dart';
 import 'package:chess_app/chat/chat_room.dart';
 import 'package:chess_app/helper/online_status.dart';
 import 'package:chess_app/profile/chessboard_theme.dart';
@@ -5,6 +6,7 @@ import 'package:chess_app/profile/game_stats.dart';
 import 'package:chess_app/profile/offline_game_history.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 class MyProfile extends StatefulWidget {
   final bool isDrawerOpen;
@@ -27,10 +29,15 @@ class _MyProfileState extends State<MyProfile> {
 
 // sign out method
   Future <void> _signOut() async{
-    await FirebaseAuth.instance.signOut();
-    setState(() {
-      setUserOnlineStatus(false);
-    });
+    try {
+      await ZegoUIKitPrebuiltCallInvitationService().uninit();
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      debugPrint('Error signing out: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error signing out: $e'))
+      );
+    }
   }
 
   // delete account method

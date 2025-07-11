@@ -3,6 +3,8 @@
 -keep class javax.xml.** { *; }
 -keep class org.w3c.dom.** { *; }
 -keep class java.beans.** { *; }
+-keep class **.zego.** { *; }
+-keep class **.**.zego_zpns.** { *; }
 
 # Fix for Conscrypt
 -keep class org.conscrypt.** { *; }

@@ -1,3 +1,4 @@
+import 'package:chess_app/components/call_invitation.dart';
 import 'package:chess_app/components/textfield.dart';
 import 'package:chess_app/auth/forgot_password.dart';
 import 'package:chess_app/helper/online_status.dart';
@@ -20,8 +21,19 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool isEmailLoading = false;
   bool isGoogleLoading = false;
+
+  @override 
+  void initState(){
+    super.initState();
+    FirebaseAuth.instance.authStateChanges().listen((User? user){
+      if (user != null) {
+        CallInvitation.initCallService(user.uid, user.email ?? 'Guest');
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -46,8 +58,6 @@ class _SignInState extends State<SignIn> {
       });
     }
   }
-
-  
 
   // google sign in method 
   Future <UserCredential?> signInWithGoogle() async {
