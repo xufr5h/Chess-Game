@@ -486,12 +486,14 @@ void movePiece(int newRow, int newColumn) async {
               ),
             content: Row(
               children: [
-                Text('${currentPlayerIsWhite ? whitePlayerEmail : blackPlayerName} wins!', 
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                Flexible(
+                  child: Text('${currentPlayerIsWhite ? whitePlayerEmail : blackPlayerName} wins!', 
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Icon(

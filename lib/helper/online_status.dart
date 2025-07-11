@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -20,10 +21,43 @@ Future<bool> setUserOnlineStatus(bool isOnline) async {
 
 // checking the online status of the user
 Future<bool> isUserOnline(String userID) async {
-  final doc = await _firestore.collection('users').doc(userID).get();
-  if (!doc.exists) {
-    return false; // User document does not exist
+  try {
+    final doc = await _firestore.collection('users').doc(userID).get();
+    if (!doc.exists) return false;
+    
+    final data = doc.data()!;
+    final isOnline = data['isOnline'] ?? false;
+    final lastOnline = data['lastOnline'] as Timestamp?;
+    
+    // If explicitly online, return true
+    if (isOnline) return true;
+    
+    // If not explicitly online but was active recently
+    if (lastOnline != null) {
+      final difference = DateTime.now().difference(lastOnline.toDate());
+      return difference.inMinutes < 5; // Increased to 5 minutes
+    }
+    
+    return false;
+  } catch (e) {
+    debugPrint('Error checking online status: $e');
+    return false; // Default to offline if there's an error
   }
-  final data = doc.data();
-  return data?['isOnline'] ?? false;
+}
+
+Stream<bool> getUserOnlineStatusStream(String userID) {
+  return _firestore.collection('users').doc(userID)
+    .snapshots()
+    .map((doc) {
+      if (!doc.exists) return false;
+      final data = doc.data()!;
+      final isOnline = data['isOnline'] ?? false;
+      final lastOnline = data['lastOnline'] as Timestamp?;
+      
+      if (isOnline) return true;
+      if (lastOnline != null) {
+        return DateTime.now().difference(lastOnline.toDate()).inMinutes < 5;
+      }
+      return false;
+    });
 }

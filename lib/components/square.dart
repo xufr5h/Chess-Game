@@ -34,7 +34,6 @@ class Square extends StatelessWidget {
     else {
       squareColor = isWhite ? theme.lightSquareColor : theme.darkSquareColor;
     }
-
     // add red border if the king is in check
     if (isInCheck && piece?.type == chessPieceType.king) {
       borderColor = theme.checkBorderColor;

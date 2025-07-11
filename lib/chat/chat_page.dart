@@ -29,6 +29,7 @@ class _ChatPageState extends State<ChatPage> {
   final ChatService _chatService = ChatService();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   User? get currentUser => _auth.currentUser;
 
@@ -100,7 +101,8 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     // checking the receiver onlne status
-    final isReceiverOnline = await isUserOnline(widget.receiverID);
+    try {
+      final isReceiverOnline = await isUserOnline(widget.receiverID);
     if (!isReceiverOnline) {
       _showUserOfflineDialog();
       return;
@@ -126,6 +128,13 @@ class _ChatPageState extends State<ChatPage> {
         ),
     ),
     );
+    } catch (e) {
+      debugPrint('Error checking receiver online status: $e');
+       ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error checking user status: $e')),
+    );
+    }
+    
   }
 
   //method to start a call
@@ -138,6 +147,7 @@ class _ChatPageState extends State<ChatPage> {
 
     // checking the receiver onlne status
     final isReceiverOnline = await isUserOnline(widget.receiverID);
+    debugPrint('Receiver online status: $isReceiverOnline');
     if (!isReceiverOnline) {
       _showUserOfflineDialog();
       return;
@@ -162,7 +172,7 @@ class _ChatPageState extends State<ChatPage> {
     ); 
   }
 
-  // offline dialog
+// offline dialog
   void _showUserOfflineDialog(){
       showDialog(
         context: context, 
@@ -188,6 +198,7 @@ class _ChatPageState extends State<ChatPage> {
         )
       );
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -196,9 +207,29 @@ class _ChatPageState extends State<ChatPage> {
       resizeToAvoidBottomInset: false, // Changed to false
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
-          widget.receiverEmail,
-          style: const TextStyle(color: Colors.white),
+        title: Row(
+          children: [
+            StreamBuilder<bool>(
+              stream: getUserOnlineStatusStream(widget.receiverID), 
+              builder: (context, snapshot){
+                final isOnline = snapshot.data ?? false;
+                return Image.asset(
+                  'lib/images/online.png',
+                  height: 12,
+                  width: 12,
+                  color: isOnline ? Colors.green : Colors.grey,
+                );
+              }
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                widget.receiverEmail,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+            
+          ],
         ),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,

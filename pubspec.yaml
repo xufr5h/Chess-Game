@@ -34,13 +34,12 @@ dependencies:
   firebase_auth: ^5.6.2
   cloud_firestore: ^5.6.11
   google_sign_in: ^6.2.1
-  flutter_riverpod: ^2.4.9
   provider: ^6.1.5
+  shared_preferences: ^2.5.3
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   intl: ^0.18.1
   uuid: ^4.5.1
-  shared_preferences: ^2.5.3
   zego_uikit_prebuilt_call: ^4.17.5
   zego_uikit_signaling_plugin: ^2.8.13
   zego_uikit: ^2.28.20
@@ -90,6 +89,7 @@ flutter:
   - lib/images/online.jpeg
   - lib/images/chat.png
   - lib/images/theme.png
+  - lib/images/online.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
