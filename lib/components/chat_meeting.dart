@@ -43,7 +43,7 @@ class ChatMeeting extends StatelessWidget {
             onTap: (){
              
             },
-            leading: const Icon(Icons.schedule, color: Colors.white,),
+            leading: const Icon(Icons.calendar_month, color: Colors.white,),
             title: const Text(
               'Send Scheduled Meeting Link',
              style: TextStyle(
