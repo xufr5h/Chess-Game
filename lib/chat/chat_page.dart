@@ -1,5 +1,6 @@
 import 'package:chess_app/chat/chat_service.dart';
 import 'package:chess_app/components/chat_bubble.dart';
+import 'package:chess_app/components/chat_meeting.dart';
 import 'package:chess_app/components/textfield.dart';
 import 'package:chess_app/helper/app_constants.dart';
 import 'package:chess_app/helper/online_status.dart';
@@ -111,9 +112,7 @@ class _ChatPageState extends State<ChatPage> {
       resourceID: resourceID,
     ).then((result){
       if (!result) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to start call')),
-        );
+        _showUserOfflineDialog();
       }
     });
   }
@@ -154,11 +153,9 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         centerTitle: true,
         title:
-            Flexible(
-              child: Text(
-                widget.receiverEmail,
-                style: const TextStyle(color: Colors.white),
-              ),
+            Text(
+              widget.receiverEmail,
+              style: const TextStyle(color: Colors.white),
             ),    
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
@@ -175,7 +172,13 @@ class _ChatPageState extends State<ChatPage> {
           margin: const EdgeInsets.only(right: 10),
           child: IconButton(
             onPressed: (){
-              _startCall(context, widget.receiverID, widget.receiverEmail, true);
+              showModalBottomSheet(
+                backgroundColor: const Color.fromARGB(255, 35, 44, 49),
+                context: context,
+                builder: (BuildContext context){
+                  return const ChatMeeting();
+                }
+              );
             },
             icon: const Icon(Icons.videocam, color: Colors.green, size: 30),),
         )
