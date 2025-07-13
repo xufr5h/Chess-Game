@@ -1,7 +1,16 @@
+import 'package:chess_app/helper/meeting_handler.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class ChatMeeting extends StatelessWidget {
-  const ChatMeeting({super.key});
+
+   ChatMeeting({super.key});
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +35,10 @@ class ChatMeeting extends StatelessWidget {
              ),
           const Divider(),
           ListTile(
-            onTap: (){
-              
+            onTap: () async {
+              Navigator.pop(context);
+              await joinInstantMeeting( 'InstantMeeting${DateTime.now().millisecondsSinceEpoch}');
+
             },
             leading: const Icon(Icons.bolt, color: Colors.white,),
             title: const Text(

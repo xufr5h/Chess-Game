@@ -88,5 +88,21 @@ class ChatService {
         throw error;
       });
   }
+
+  Future<void> sendMessageToChat(String senderId, String receiverId, String message) async {
+  final ids = [senderId, receiverId]..sort();
+  final chatRoomId = ids.join('_');
+
+  await FirebaseFirestore.instance
+      .collection('chatRooms')
+      .doc(chatRoomId)
+      .collection('messages')
+      .add({
+        'senderID': senderId,
+        'message': message,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+}
+
   
 }

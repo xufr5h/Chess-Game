@@ -10,13 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
-import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
+// import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+// import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
 import 'firebase_options.dart'; 
 import 'package:hive/hive.dart';
 
 
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+// final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,20 +25,21 @@ void main() async{
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // initializing zego uikit signaling plugin
-  final currentUser = FirebaseAuth.instance.currentUser;
-  if (currentUser != null) {
-    await ZegoUIKitPrebuiltCallInvitationService().init(
-      appID: AppConstants.APP_ID,
-      appSign: AppConstants.APP_SIGN,
-      userID: currentUser.uid,
-      userName: currentUser.email ?? 'Guest',
-      plugins: [
-        ZegoUIKitSignalingPlugin(),
-      ]
-    );
-        ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(navigatorKey);
-  }
+  // // initializing zego uikit signaling plugin
+  // final currentUser = FirebaseAuth.instance.currentUser;
+  // if (currentUser != null) {
+  //   await ZegoUIKitPrebuiltCallInvitationService().init(
+  //     appID: AppConstants.APP_ID,
+  //     appSign: AppConstants.APP_SIGN,
+  //     userID: currentUser.uid,
+  //     userName: currentUser.email ?? 'Guest',
+  //     plugins: [
+  //       ZegoUIKitSignalingPlugin(),
+  //     ]
+  //   );
+  //       ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(navigatorKey);
+  // }
+
 
   // initializing the hive
   await Hive.initFlutter();
@@ -65,7 +67,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      navigatorKey: navigatorKey,
+      // navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       home: MainPage(),
     );

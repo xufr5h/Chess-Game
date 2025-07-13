@@ -25,15 +25,15 @@ class _SignInState extends State<SignIn> {
   bool isEmailLoading = false;
   bool isGoogleLoading = false;
 
-  @override 
-  void initState(){
-    super.initState();
-    FirebaseAuth.instance.authStateChanges().listen((User? user){
-      if (user != null) {
-        CallInvitation.initCallService(user.uid, user.email ?? 'Guest');
-      }
-    });
-  }
+  // @override 
+  // void initState(){
+  //   super.initState();
+  //   FirebaseAuth.instance.authStateChanges().listen((User? user){
+  //   //   if (user != null) {
+  //   //     CallInvitation.initCallService(user.uid, user.email ?? 'Guest');
+  //   //   }
+  //   // });
+  // }
 
   @override
   void dispose() {

@@ -7,9 +7,9 @@ import 'package:chess_app/helper/online_status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
-import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
-import 'package:zego_uikit/zego_uikit.dart';
+// import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+// import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
+// import 'package:zego_uikit/zego_uikit.dart';
 
 class ChatPage extends StatefulWidget {
   final String receiverEmail;
@@ -36,11 +36,11 @@ class _ChatPageState extends State<ChatPage> {
   User? get currentUser => _auth.currentUser;
 
   // configuring the zegocall
-  final ZegoUIKitPrebuiltCallConfig config = ZegoUIKitPrebuiltCallConfig(
-    turnOnCameraWhenJoining: true,
-    turnOnMicrophoneWhenJoining: true,
-    useSpeakerWhenJoining: true,
-  );
+  // final ZegoUIKitPrebuiltCallConfig config = ZegoUIKitPrebuiltCallConfig(
+  //   turnOnCameraWhenJoining: true,
+  //   turnOnMicrophoneWhenJoining: true,
+  //   useSpeakerWhenJoining: true,
+  // );
 
   @override
   void initState() {
@@ -101,21 +101,21 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  // start call method
-  void _startCall(BuildContext context, String receiverID, String receiverEmail, bool isVideoCall){
-    final resourceID = isVideoCall ? 'zegouikit_video_call' : 'zegouikit_audio_call';
-    ZegoUIKitPrebuiltCallInvitationService().send(
-      invitees: [
-        ZegoCallUser(receiverID, receiverEmail)
-      ], 
-      isVideoCall: isVideoCall,
-      resourceID: resourceID,
-    ).then((result){
-      if (!result) {
-        _showUserOfflineDialog();
-      }
-    });
-  }
+  // // start call method
+  // void _startCall(BuildContext context, String receiverID, String receiverEmail, bool isVideoCall){
+  //   final resourceID = isVideoCall ? 'zegouikit_video_call' : 'zegouikit_audio_call';
+  //   ZegoUIKitPrebuiltCallInvitationService().send(
+  //     invitees: [
+  //       ZegoCallUser(receiverID, receiverEmail)
+  //     ], 
+  //     isVideoCall: isVideoCall,
+  //     resourceID: resourceID,
+  //   ).then((result){
+  //     if (!result) {
+  //       _showUserOfflineDialog();
+  //     }
+  //   });
+  // }
 
 // offline dialog
   void _showUserOfflineDialog(){
@@ -163,7 +163,7 @@ class _ChatPageState extends State<ChatPage> {
         actions: [
           IconButton(
             onPressed: (){
-              _startCall(context, widget.receiverID, widget.receiverEmail, false);
+              // _startCall(context, widget.receiverID, widget.receiverEmail, false);
             },
             icon: const Icon(Icons.call, color: Colors.green, size: 28
           ),
@@ -176,7 +176,7 @@ class _ChatPageState extends State<ChatPage> {
                 backgroundColor: const Color.fromARGB(255, 35, 44, 49),
                 context: context,
                 builder: (BuildContext context){
-                  return const ChatMeeting();
+                  return  ChatMeeting();
                 }
               );
             },

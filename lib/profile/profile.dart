@@ -6,7 +6,7 @@ import 'package:chess_app/profile/game_stats.dart';
 import 'package:chess_app/profile/offline_game_history.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+// import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 class MyProfile extends StatefulWidget {
   final bool isDrawerOpen;
@@ -30,7 +30,7 @@ class _MyProfileState extends State<MyProfile> {
 // sign out method
   Future <void> _signOut() async{
     try {
-      await ZegoUIKitPrebuiltCallInvitationService().uninit();
+      // await ZegoUIKitPrebuiltCallInvitationService().uninit();
       await FirebaseAuth.instance.signOut();
     } catch (e) {
       debugPrint('Error signing out: $e');
