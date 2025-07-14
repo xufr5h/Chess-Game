@@ -1,12 +1,14 @@
-  import 'package:chess_app/helper/schedule_meeting.dart';
+import 'package:chess_app/helper/schedule_meeting.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-  import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
+import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
+
 
   final currentUser = FirebaseAuth.instance.currentUser;
   // initializing the Jitsi Meet SDK
   final jitsiMeet = JitsiMeet();
-  final List<ScheduleMeeting> scheduledMeetings = [];
+  DateTime? _selectedDateTime;
+  
 
    // listener for Jitsi Meet events
   final listener = JitsiMeetEventListener(
@@ -78,5 +80,15 @@ import 'package:firebase_auth/firebase_auth.dart';
     jitsiMeet.join(options, listener);
  }
 
-
-
+Future<void> storeMeeting(String senderId, String receiverId, DateTime scheduledTime) async {
+  final meetingUrl = await generateInstantMeetingLink();
+  await FirebaseFirestore.instance
+      .collection('Meetings')
+      .add({
+        'senderId': senderId,
+        'receiverId': receiverId,
+        'meetingUrl': await generateInstantMeetingLink(),
+        'scheduledTime': scheduledTime,
+        'timeStamp': FieldValue.serverTimestamp(),
+      });
+}

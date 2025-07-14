@@ -176,7 +176,10 @@ class _ChatPageState extends State<ChatPage> {
                 backgroundColor: const Color.fromARGB(255, 35, 44, 49),
                 context: context,
                 builder: (BuildContext context){
-                  return  ChatMeeting();
+                  return  ChatMeeting(
+                    currentId: currentUser?.uid ?? '',
+                    receiverId: widget.receiverID,
+                  );
                 }
               );
             },

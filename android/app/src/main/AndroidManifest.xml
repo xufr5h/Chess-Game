@@ -19,6 +19,7 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true" 
+        android:value="@integer/google_play_services_version"
         >
         
         <activity

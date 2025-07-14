@@ -1,10 +1,14 @@
 import 'package:chess_app/helper/meeting_handler.dart';
 import 'package:chess_app/helper/schedule_meeting.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:chess_app/chat/chat_service.dart';
 
 class Schedule extends StatefulWidget {
-  const Schedule({super.key});
+  final String currentId;
+  final String receiverId;
+  const Schedule({super.key, required this.currentId ,required this.receiverId});
 
   @override
   State<Schedule> createState() => _ScheduleState();
@@ -17,7 +21,9 @@ class _ScheduleState extends State<Schedule> {
   DateTime? _selectedDateTime;
   bool isLoading = false;
 
-  List<ScheduleMeeting> scheduledMeetings = [];
+  final ChatService _chatService = ChatService();
+  final List<ScheduleMeeting> scheduledMeetings = [];
+
 
   // date and time picker for scheduling meetings
   Future<void> _pickDateTime() async {
@@ -82,27 +88,69 @@ class _ScheduleState extends State<Schedule> {
       });
   }
 
-    Future<void> _scheduleMeeting() async {
-    if (_formKey.currentState!.validate() && _selectedDateTime != null) {
+      Future<void> _scheduleMeeting() async {
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all fields')),
+      );
+      return;
+    }
+
+    if (_selectedDateTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a date and time')),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
       final roomName = _roomNameController.text.trim();
       final meeting = ScheduleMeeting(
         roomName: roomName,
         meetingUrl: 'https://meet.jit.si/$roomName',
         scheduledTime: _selectedDateTime!,
-
       );
 
       final link = await generateScheduledMeetingLink(meeting);
+      
+      await storeMeeting(
+        widget.currentId,
+        widget.receiverId,
+        _selectedDateTime!,
+      );
 
-      setState(() {
-        scheduledMeetings.add(meeting);
-      });
+      await _chatService.sendMessageToChat(
+        widget.currentId,
+        widget.receiverId,
+        'Scheduled Meeting: $link'
+      );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Meeting scheduled: $link')),
       );
+
+      // Clear the form after successful submission
+      _roomNameController.clear();
+      setState(() => _selectedDateTime = null);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to schedule meeting: ${e.toString()}')),
+      );
+    } finally {
+      setState(() => isLoading = false);
     }
   }
+
+  Stream<QuerySnapshot> getMeetingsStream(String currentId, String receiverId) {
+  return FirebaseFirestore.instance
+      .collection('Meetings')
+      .where('senderId', isEqualTo: currentId)
+      .where('receiverId', isEqualTo: receiverId)
+      .orderBy('scheduledTime', descending: false)
+      .snapshots();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -202,77 +250,113 @@ class _ScheduleState extends State<Schedule> {
               const SizedBox(height: 20),
               const Divider(),
               const Text(
-                'Scheduled Meetings',
+                'Your Meetings',
                 style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: ListView.builder(
-                  itemCount: scheduledMeetings.length,
-                  itemBuilder: (context, index){
-                    final meeting = scheduledMeetings[index];
-                    return Card(
-                        color: const Color.fromARGB(255, 255, 255, 255),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 4,
-                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      meeting.roomName,
-                                      style: const TextStyle(
-                                        color: Color.fromARGB(255, 52, 51, 51),
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  Align(
-                                alignment: Alignment.centerRight,
-                                child: ElevatedButton.icon(
-                                  onPressed: () {
-                                    joinScheduledMeeting(meeting.roomName);
-                                  },
-                                  icon: const Icon(Icons.link, color: Colors.white),
-                                  label: const Text('Join', style: TextStyle(color: Colors.white)),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                  ),
-                                ),
-                              ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Scheduled for: ${dateFormat.format(meeting.scheduledTime)}',
-                                style: const TextStyle(
-                                  color: Color.fromARGB(179, 46, 44, 44),
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: getMeetingsStream(currentUser!.uid, widget.receiverId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator(color: Colors.white));
+                    }
+
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No meetings yet.',
+                          style: TextStyle(color: Colors.white70),
                         ),
                       );
-                  }
+                    }
+
+                    final meetings = snapshot.data!.docs;
+
+                    return ListView.builder(
+                      itemCount: meetings.length,
+                      itemBuilder: (context, index) {
+                        final data = meetings[index].data() as Map<String, dynamic>;
+
+                        final roomUrl = data['meetingUrl'] ?? '';
+                        final roomName = Uri.parse(roomUrl).pathSegments.last;
+                        final DateTime? scheduledTime = (data['scheduledTime'] as Timestamp?)?.toDate();
+
+                        return Card(
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 4,
+                          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        roomName,
+                                        style: const TextStyle(
+                                          color: Color.fromARGB(255, 52, 51, 51),
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: ElevatedButton.icon(
+                                        onPressed: () {
+                                          joinScheduledMeeting(roomName);
+                                        },
+                                        icon: const Icon(Icons.link, color: Colors.white),
+                                        label: const Text('Join', style: TextStyle(color: Colors.white)),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.green,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                if (scheduledTime != null)
+                                  Text(
+                                    'Scheduled for: ${dateFormat.format(scheduledTime)}',
+                                    style: const TextStyle(
+                                      color: Color.fromARGB(179, 46, 44, 44),
+                                      fontSize: 14,
+                                    ),
+                                  )
+                                else
+                                  const Text(
+                                    'Instant Meeting',
+                                    style: TextStyle(
+                                      color: Color.fromARGB(179, 46, 44, 44),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
           ],
         ),
         ),
     );
+    
   }
 }
+
