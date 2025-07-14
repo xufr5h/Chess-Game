@@ -1,3 +1,4 @@
+import 'package:chess_app/chat/schedule.dart';
 import 'package:chess_app/helper/meeting_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -51,8 +52,11 @@ class ChatMeeting extends StatelessWidget {
              ),
              ),
           ListTile(
-            onTap: (){
-             
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Schedule()),
+              );
             },
             leading: const Icon(Icons.calendar_month, color: Colors.white,),
             title: const Text(
